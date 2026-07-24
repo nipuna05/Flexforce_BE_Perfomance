@@ -1,0 +1,4 @@
+{
+  "description": "Rolling history of FlexForce backend/API response-timing runs (measure-api.mjs: Login API, register, license-mgt add/update/delete endpoint response times, per role) — parallel to the frontend results/run-history.json, but for pure API timing rather than browser UI-flow timing. Append one entry per completed, trustworthy run.",
+  "runs": []
+}

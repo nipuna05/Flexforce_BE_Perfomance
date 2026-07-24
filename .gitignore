@@ -1,0 +1,3 @@
+.credentials.local.json
+node_modules/
+shots/*storage-state*.json

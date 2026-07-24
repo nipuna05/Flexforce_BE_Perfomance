@@ -1,0 +1,95 @@
+{
+  "runLabel": "smoke-test-api-run1",
+  "runTimestamp": "1784874790141",
+  "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+  "results": [
+    {
+      "role": "Admin",
+      "username": "adminperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 5576,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 1030,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 1348,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST /api/auth/register",
+          "ms": 772,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/register",
+            "body": "235"
+          }
+        },
+        {
+          "label": "API: GET /api/license-mgt/lic-type?startedDtsId=452",
+          "ms": 214,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/lic-type?startedDtsId=452",
+            "body": "{\"licTypeId\":13}"
+          }
+        },
+        {
+          "label": "API: POST /api/license-mgt/user",
+          "ms": 214,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/user",
+            "body": "{\"status\":\"success\",\"message\":\"User successfully mapped to SD node.\",\"licType\":13,\"licId\":104,\"licUserId\":235}",
+            "userId": 235
+          }
+        },
+        {
+          "label": "API: PUT /api/license-mgt/{licId}/users/{userId} (update)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 405,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/104/users/235",
+            "body": null
+          }
+        },
+        {
+          "label": "API: DELETE /api/license-mgt/{licId}/users/{userId} (cleanup)",
+          "ms": 218,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/104/users/235"
+          }
+        }
+      ],
+      "notes": [
+        "Login endpoint observed: POST https://hrm2-apidemo2-it.h2software.nl/api/auth/login -> 200",
+        "Confirmed endpoint DELETE /api/license-mgt/{licId} intentionally not exercised (destructive — deletes a whole distributor/partner/client shell entity)."
+      ]
+    }
+  ]
+}

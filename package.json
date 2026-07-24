@@ -1,0 +1,10 @@
+{
+  "name": "flexforce-performance-report",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FlexForce License Management performance-timing suite: Playwright-driven frontend (measure.mjs) and backend/API (measure-api.mjs) response-time measurements, plus Excel report generators. Measures real single-request response times only — NOT a load/stress testing tool.",
+  "dependencies": {
+    "playwright": "^1.55.0",
+    "exceljs": "^4.4.0"
+  }
+}
