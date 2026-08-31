@@ -85,6 +85,19 @@ function fieldsIdentical(before, after, fields) {
   return fields.every(f => (before[f] ?? null) === (after[f] ?? null));
 }
 
+// GetDtsMenu/GetMmsMenu/GetMmsTokens/GetObjItems all return Result<string> from EndpointHelper.HandleQuery
+// (Results.Ok(result.Value) where result.Value is already a JSON array/object string produced by a SQL
+// FOR JSON PATH query) — ASP.NET's default JSON serializer then re-encodes that string as a JSON string
+// literal, so the HTTP body is a JSON string containing JSON text. This undoes both encodings.
+function parseDoubleEncodedBlob(bodyText) {
+  if (!bodyText) return null;
+  let outer;
+  try { outer = JSON.parse(bodyText); } catch { return null; }
+  if (outer === null || outer === undefined) return null;
+  if (typeof outer !== 'string') return outer;
+  try { return JSON.parse(outer); } catch { return null; }
+}
+
 async function loginAndGetToken(browser, user, flow) {
   const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
   const page = await context.newPage();
@@ -258,20 +271,68 @@ async function measureScreensApi(browser, user) {
     // =====================================================================
     // SCREENS: MMS
     // =====================================================================
+    // mmsMenuSampleRow: { mmsId, mmsToken } captured ONLY from sp_GetMMSMenuHierarchy's "SD user NOT
+    // in BA" branch (Step 3 in the .sql — fires when @IsLicUser=1 AND @IsInBa=0, which is exactly the
+    // Root/Admin case here: both have no BA_Users row anywhere and no BA JWT claim, so baId always
+    // resolves to 0). That branch's `title` column is ISNULL(t.MMSToken, m.MMSName) sourced from a
+    // bare `LEFT JOIN LAN_MMS t` with NO LAN_BA_MMS overlay at all — unlike the general BaseMenu CTE
+    // path (used once a caller IS in a BA), which additionally does ISNULL(LAN_BA_MMS.token, ...) and
+    // would silently mask a real LAN_MMS value behind a per-BA override. Because Step 3 never touches
+    // LAN_BA_MMS, writing this exact title back via UpdateLanMms is provably safe either way: if a real
+    // LAN_MMS row exists, title IS its current MMSToken (true no-op); if no row exists, title is just
+    // the MMSName fallback and UpdateLanMmsCommandHandler's LanMms lookup (by MmsId,LanId) finds
+    // nothing and safely no-ops the write (returns success:false, LanMmsError.LanMmsNotFound
+    // internally, never inserts) — the same "true update or safe rejection" guarantee already used for
+    // UpdateLanDal. BA role is deliberately excluded: baperform IS a real BA member, so its GetMmsMenu
+    // call takes the masked BaseMenu path (or 404s, per prior run) and can't safely feed this pattern.
+    let mmsMenuSampleRow = null;
     flow.push(await step('API: GET screen/mms (GetMmsMenu, context-derived baid/languageId)', async () => {
       const res = await apiCtx.get('/api/screen/mms');
       const status = res.status();
       const bodyText = await res.text();
+      if (status === 200 && user.role !== 'BA') {
+        const blob = parseDoubleEncodedBlob(bodyText);
+        if (Array.isArray(blob) && blob.length > 0 && Number.isFinite(blob[0]?.MMSID) && typeof blob[0]?.title === 'string') {
+          mmsMenuSampleRow = { mmsId: blob[0].MMSID, mmsToken: blob[0].title };
+        }
+      }
       return { status, url: res.url(), bodyLength: bodyText?.length ?? 0 };
     }));
-    flow.push(await step(`API: GET screen/mms-tokens?baId=${BA_ID_FALLBACK} (GetMmsTokens)`, async () => {
-      const res = await apiCtx.get('/api/screen/mms-tokens', { params: { baId: BA_ID_FALLBACK, ...(claims.languageId ? { languageId: claims.languageId } : {}) } });
+    if (mmsMenuSampleRow && claims.languageId) {
+      flow.push(await step('API: POST screen/mms-tokens (UpdateLanMms - no-op round trip, unmasked Step-3 LAN_MMS value)', async () => {
+        const res = await apiCtx.post('/api/screen/mms-tokens', {
+          data: { Items: [{ LanId: claims.languageId, MmsId: mmsMenuSampleRow.mmsId, MmsToken: mmsMenuSampleRow.mmsToken }] },
+        });
+        const status = res.status();
+        let json = null;
+        try { json = await res.json(); } catch { /* not JSON / empty body */ }
+        return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null, mmsId: mmsMenuSampleRow.mmsId };
+      }));
+      flow.push(await step('API: GET screen/mms (verify UpdateLanMms wrote back byte-identical title)', async () => {
+        const res = await apiCtx.get('/api/screen/mms');
+        const status = res.status();
+        const bodyText = await res.text();
+        const blob = parseDoubleEncodedBlob(bodyText);
+        const row = Array.isArray(blob) ? blob.find(r => r.MMSID === mmsMenuSampleRow.mmsId) : null;
+        const identical = !!row && row.title === mmsMenuSampleRow.mmsToken;
+        if (row && !identical) {
+          notes.push(`WARNING: UpdateLanMms verification MISMATCH for mmsId=${mmsMenuSampleRow.mmsId} — before="${mmsMenuSampleRow.mmsToken}" after="${row.title}".`);
+        }
+        return { status, identical, before: mmsMenuSampleRow.mmsToken, after: row?.title };
+      }));
+    } else {
+      notes.push(`UpdateLanMms no-op round trip skipped for role ${user.role}: no mmsMenuSampleRow captured from GetMmsMenu's unmasked Step-3 branch (either the call didn't return 200, or (as expected for a real BA member like BA role) it took the masked/general path instead).`);
+    }
+
+    const mmsTokensBaId = user.role === 'BA' ? BA_ROLE_OWN_BA_ID : BA_ID_FALLBACK;
+    flow.push(await step(`API: GET screen/mms-tokens?baId=${mmsTokensBaId} (GetMmsTokens, role-aware baId so the BA role probes its OWN real BA_Users membership)`, async () => {
+      const res = await apiCtx.get('/api/screen/mms-tokens', { params: { baId: mmsTokensBaId, ...(claims.languageId ? { languageId: claims.languageId } : {}) } });
       const status = res.status();
       const bodyText = await res.text();
       return { status, url: res.url(), bodyLength: bodyText?.length ?? 0 };
     }));
-    notes.push('GetMmsTokens/GetMtsTokens (400 Token.TokenNotFound "Missing Tokens") for baId=185/languageId=2: confirmed via live probe this is a genuine data condition (no LAN_MMS/LAN_MTS token rows exist for that BA+language combo), not a script defect — both params were valid and explicitly supplied.');
-    notes.push('SetMmsMenu, UpdateLanMms, DeleteMms SKIPPED: SetMmsMenu is INSERT-only (documented in source as "never updates an existing MMS row", 409 on repeat name+parent); UpdateLanMms is a true no-op UPDATE by (MmsId,LanId) in principle, but the only current-value source is the opaque double-encoded hierarchy blob from GetMmsMenu/GetMmsTokens with no confirmed fallback semantics (unlike UpdateLanDal, whose stored procedure was read directly and confirmed safe) — skipping per the "when genuinely unsure, skip" rule rather than risk overwriting a real live menu translation; DeleteMms is an explicit recursive subtree hard delete.');
+    notes.push('GetMmsTokens/GetMtsTokens 400 (Token.TokenNotFound "Missing Tokens") for baId=185/languageId=2 (Root/Admin) is NOT purely a data condition as previously assumed: sp_GetMMSMenuToken (read directly) returns NULL up front whenever the caller has no BA_Users row for @BaId at all — Root/Admin have zero BA_Users rows anywhere, so this 400 fires regardless of whether real LAN_MMS/LAN_BA_MMS token rows exist for BA 185. The BA role now probes its OWN real BA_Users membership (baId=228) instead of the always-foreign 185, which is a genuine BA_Users member and a more meaningful probe of this endpoint\'s success path.');
+    notes.push('SetMmsMenu, DeleteMms SKIPPED: SetMmsMenu is INSERT-only (documented in source as "never updates an existing MMS row", 409 on repeat name+parent); DeleteMms is an explicit recursive subtree hard delete.');
 
     // =====================================================================
     // SCREENS: MTS
@@ -333,12 +394,61 @@ async function measureScreensApi(browser, user) {
     // =====================================================================
     // SCREENS: OBJECT / DET
     // =====================================================================
-    flow.push(await step(`API: GET screen/det/obj?dtsId=${DTS_CLIENT_LIST} (GetObjItems)`, async () => {
-      const res = await apiCtx.get('/api/screen/det/obj', { params: { dtsId: DTS_CLIENT_LIST } });
-      const status = res.status();
-      const bodyText = await res.text();
-      return { status, url: res.url(), bodyLength: bodyText?.length ?? 0 };
-    }));
+    // objSampleRow: { objId, objToken, dtsId } — first OBJ row with a non-empty OBJToken, discovered
+    // across the same 3 dtsId candidates used for GetDal above. Sp_GetObjItems's "@BaId=0" branch
+    // (read directly) returns `lo.OBJToken` straight from `LEFT JOIN LAN_OBJ lo ON lo.OBJId=o.OBJId
+    // AND lo.LanId=@LanId` with NO fallback/ISNULL masking (null stays null, unlike MMS's title) — and
+    // baId always resolves to 0 here because none of Root/Admin/BA carry a BA JWT claim and no baid
+    // query param is passed. So a non-null OBJToken in this response IS the raw, current LAN_OBJ.OBJToken
+    // value for that (OBJId,LanId), safe to round-trip: UpdateObjTokensCommandHandler (read directly,
+    // ObjTokensService.AddOrUpdateObjTokensAsync) looks up LanObjs by (LanId,OBJId) only — no BA
+    // involvement at all — and NEVER inserts (returns ObjTokensError.LanObjNotFound if no row exists),
+    // so sending back the exact value just read is either a true no-op UPDATE or a safe no-op rejection.
+    let objSampleRow = null;
+    const objTokensByDtsId = {}; // dtsId -> [{objId, objToken}] from the unmasked baId=0 pass, reused by the UpdateBaObjTokens diagnostic below
+    for (const dtsId of [DTS_ADMIN_LIST, DTS_CLIENT_LIST, DTS_BA_LIST]) {
+      const r = await step(`API: GET screen/det/obj?dtsId=${dtsId} (GetObjItems, unmasked baId=0)`, async () => {
+        const res = await apiCtx.get('/api/screen/det/obj', { params: { dtsId } });
+        const status = res.status();
+        const bodyText = await res.text();
+        const blob = parseDoubleEncodedBlob(bodyText);
+        if (Array.isArray(blob)) {
+          objTokensByDtsId[dtsId] = blob.filter(o => Number.isFinite(o?.OBJId)).map(o => ({ objId: o.OBJId, objToken: o.OBJToken ?? null }));
+          if (!objSampleRow) {
+            const withToken = blob.find(o => Number.isFinite(o?.OBJId) && typeof o?.OBJToken === 'string' && o.OBJToken.trim().length > 0);
+            if (withToken) objSampleRow = { objId: withToken.OBJId, objToken: withToken.OBJToken, dtsId };
+          }
+        }
+        return { status, url: res.url(), bodyLength: bodyText?.length ?? 0, dataLength: Array.isArray(blob) ? blob.length : null };
+      });
+      flow.push(r);
+    }
+    if (objSampleRow && claims.languageId) {
+      flow.push(await step('API: POST screen/obj-tokens (UpdateObjTokens - no-op round trip, unmasked baId=0 LAN_OBJ value)', async () => {
+        const res = await apiCtx.post('/api/screen/obj-tokens', {
+          data: { objTokenList: [{ LanId: claims.languageId, OBJId: objSampleRow.objId, OBJToken: objSampleRow.objToken }] },
+        });
+        const status = res.status();
+        let json = null;
+        try { json = await res.json(); } catch { /* not JSON / empty body */ }
+        return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null, objId: objSampleRow.objId };
+      }));
+      flow.push(await step('API: GET screen/det/obj?dtsId=... (verify UpdateObjTokens wrote back byte-identical OBJToken)', async () => {
+        const res = await apiCtx.get('/api/screen/det/obj', { params: { dtsId: objSampleRow.dtsId } });
+        const status = res.status();
+        const bodyText = await res.text();
+        const blob = parseDoubleEncodedBlob(bodyText);
+        const row = Array.isArray(blob) ? blob.find(o => o.OBJId === objSampleRow.objId) : null;
+        const identical = !!row && row.OBJToken === objSampleRow.objToken;
+        if (row && !identical) {
+          notes.push(`WARNING: UpdateObjTokens verification MISMATCH for objId=${objSampleRow.objId} — before="${objSampleRow.objToken}" after="${row.OBJToken}".`);
+        }
+        return { status, identical, before: objSampleRow.objToken, after: row?.OBJToken };
+      }));
+    } else {
+      notes.push('UpdateObjTokens no-op round trip skipped: no OBJ row with a non-empty OBJToken was found across dtsId candidates [452,464,468] in the unmasked baId=0 GetObjItems pass.');
+    }
+
     flow.push(await step('API: POST screen/det/obj/batch (GetObjItemsBatch, DtsIds=[452,464,468])', async () => {
       const res = await apiCtx.post('/api/screen/det/obj/batch', {
         data: { BaId: null, LanguageId: claims.languageId, DtsIds: [DTS_ADMIN_LIST, DTS_CLIENT_LIST, DTS_BA_LIST] },
@@ -349,7 +459,74 @@ async function measureScreensApi(browser, user) {
       return { status, url: res.url(), dataLength: Array.isArray(json) ? json.length : null };
     }));
     notes.push('BUG FOUND (backend, not this script): GetObjItemsBatch can 404 (Obj.ObjNotFound) for the exact same dtsId that succeeds via the single GetObjItems endpoint for the same caller — confirmed live for Admin/BA on dtsId=464. Root cause read directly from source: GetObjItemsQueryHandler.cs passes `@BaId = baId ?? 0` to Sp_GetObjItems, while GetObjItemsBatchQueryHandler.cs passes the raw nullable `baId` with no `?? 0` coalesce — when the caller\'s resolved baId is null (Root/Admin/BA all have no BA claim here), the batch endpoint sends SQL NULL instead of 0, and the stored procedure does not treat NULL and 0 equivalently. Not fixed here (read-only measurement task); reported as a discovered backend bug.');
-    notes.push('SetObjItems, UpdateObjTokens, DeleteObj, DeleteDet all SKIPPED: SetObjItems is an INSERT-only Det+Obj(+associations) creator (duplicate-name error on repeat); UpdateObjTokens is a true upsert by (OBJId,LanId) in principle but, like UpdateLanMms, its only current-value source is the opaque double-encoded blob from GetObjItems/GetObjItemsBatch with unconfirmed fallback semantics — skipped for the same reason; DeleteObj/DeleteDet are hard deletes that DB-cascade (convention Cascade FK, confirmed by reading FlexForceDbContext\'s required non-nullable navigations) into BA_OBJ/USER_BA_OBJ/LAN_OBJ.');
+    notes.push('SetObjItems, DeleteObj, DeleteDet all SKIPPED: SetObjItems is an INSERT-only Det+Obj(+associations) creator (duplicate-name error on repeat); DeleteObj/DeleteDet are hard deletes that DB-cascade (convention Cascade FK, confirmed by reading FlexForceDbContext\'s required non-nullable navigations) into BA_OBJ/USER_BA_OBJ/LAN_OBJ.');
+
+    // =====================================================================
+    // UpdateBaObjTokens live diagnostic (BA role only, needs a real BA_Users membership to pass
+    // Sp_GetObjItems's Step-1 BA_Users/LicUser check for @BaId<>0). AddOrUpdateBaObjTokensAsync (read
+    // directly) is an INSERT-capable upsert on LAN_BA_OBJ (unlike UpdateObjTokens's LAN_OBJ, which
+    // never inserts) — and sp_GetObjItems's BA-scoped branch returns OBJToken as
+    // COALESCE(lba.OBJToken, lo.OBJToken), so a value read back gives no signal on its own about
+    // whether a LAN_BA_OBJ row already exists (safe true no-op) or the query merely fell back to
+    // LAN_OBJ (round-tripping it would silently INSERT a brand-new LAN_BA_OBJ customization row that
+    // never existed before — not a no-op). Cross-checking against the unmasked baId=0 values captured
+    // above (objTokensByDtsId) for the SAME OBJId is the only way available on this API surface to
+    // tell them apart: a mismatch proves a real LAN_BA_OBJ override exists (safe to round-trip); a
+    // match is inconclusive (could be a real override that happens to equal the LAN_OBJ default, or no
+    // override at all) and is treated as unsafe per the "when genuinely unsure, skip" rule.
+    // =====================================================================
+    if (user.role === 'BA') {
+      let baObjTokenMismatch = null; // { objId, baToken, unmaskedToken, dtsId }
+      let baObjTokenComparisons = 0;
+      for (const dtsId of [DTS_ADMIN_LIST, DTS_CLIENT_LIST, DTS_BA_LIST]) {
+        if (baObjTokenMismatch) break;
+        const r = await step(`API: GET screen/det/obj?dtsId=${dtsId}&baid=${BA_ROLE_OWN_BA_ID} (GetObjItems, BA-scoped, for UpdateBaObjTokens diagnostic)`, async () => {
+          const res = await apiCtx.get('/api/screen/det/obj', { params: { dtsId, baid: BA_ROLE_OWN_BA_ID } });
+          const status = res.status();
+          const bodyText = await res.text();
+          const blob = parseDoubleEncodedBlob(bodyText);
+          if (Array.isArray(blob)) {
+            const unmasked = objTokensByDtsId[dtsId] || [];
+            for (const row of blob) {
+              if (!Number.isFinite(row?.OBJId) || typeof row?.OBJToken !== 'string' || !row.OBJToken.trim()) continue;
+              const unmaskedRow = unmasked.find(u => u.objId === row.OBJId);
+              if (!unmaskedRow) continue;
+              baObjTokenComparisons++;
+              if (unmaskedRow.objToken !== row.OBJToken) {
+                baObjTokenMismatch = { objId: row.OBJId, baToken: row.OBJToken, unmaskedToken: unmaskedRow.objToken, dtsId };
+                break;
+              }
+            }
+          }
+          return { status, url: res.url(), dataLength: Array.isArray(blob) ? blob.length : null };
+        });
+        flow.push(r);
+      }
+      if (baObjTokenMismatch) {
+        flow.push(await step('API: POST businessAdministration/obj-tokens (UpdateBaObjTokens - no-op round trip, confirmed real LAN_BA_OBJ override)', async () => {
+          const res = await apiCtx.post('/api/businessAdministration/obj-tokens', {
+            data: { BaObjTokenList: [{ LanId: claims.languageId, BAId: BA_ROLE_OWN_BA_ID, OBJId: baObjTokenMismatch.objId, OBJToken: baObjTokenMismatch.baToken }] },
+          });
+          const status = res.status();
+          let json = null;
+          try { json = await res.json(); } catch { /* not JSON / empty body */ }
+          return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null, objId: baObjTokenMismatch.objId };
+        }));
+        flow.push(await step('API: GET screen/det/obj?baid=... (verify UpdateBaObjTokens wrote back byte-identical OBJToken)', async () => {
+          const res = await apiCtx.get('/api/screen/det/obj', { params: { dtsId: baObjTokenMismatch.dtsId, baid: BA_ROLE_OWN_BA_ID } });
+          const status = res.status();
+          const bodyText = await res.text();
+          const blob = parseDoubleEncodedBlob(bodyText);
+          const row = Array.isArray(blob) ? blob.find(o => o.OBJId === baObjTokenMismatch.objId) : null;
+          const identical = !!row && row.OBJToken === baObjTokenMismatch.baToken;
+          return { status, identical, before: baObjTokenMismatch.baToken, after: row?.OBJToken };
+        }));
+      } else {
+        notes.push(`UpdateBaObjTokens SKIPPED: compared ${baObjTokenComparisons} OBJId(s) common to the unmasked (baId=0) and BA-scoped (baid=${BA_ROLE_OWN_BA_ID}) GetObjItems responses across dtsId [452,464,468] — every OBJToken value matched, so no live evidence of a real LAN_BA_OBJ override row could be confirmed (a match is inconclusive per COALESCE(lba.OBJToken, lo.OBJToken) in Sp_GetObjItems: could be a real override coincidentally equal to the LAN_OBJ default, or genuinely no override at all). Round-tripping an inconclusive value risks AddOrUpdateBaObjTokensAsync silently INSERTing a brand-new LAN_BA_OBJ row that never existed, so this stays skipped per the "when genuinely unsure, skip" rule.`);
+      }
+    } else {
+      notes.push('UpdateBaObjTokens diagnostic only run under the BA role: Sp_GetObjItems requires real BA_Users (or LicUser) membership for a non-zero @BaId, which Root/Admin lack entirely.');
+    }
 
     // =====================================================================
     // BUSINESSADMINISTRATION MODULE (Dal/Dts/Mms/Object, scoped by baid)
@@ -390,8 +567,17 @@ async function measureScreensApi(browser, user) {
     // GetBaDal requires dtsId to belong to that BA (BaDalError.InvalidDtsIdForgivenBaId otherwise)
     // — not every DTS menu node has DAL-level list items, so try a handful of distinct dtsId
     // candidates discovered from GetBaDts above (stopping at the first real hit) before giving up.
+    // Prioritize the dtsId(s) for DtsName 'BA_User_List'/'BA_User_Details': per
+    // src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs
+    // (read directly), BA_DAL rows for those two DTS nodes were seeded for EVERY BAId that already had
+    // ANY existing BA_DAL row — i.e. real DAL-level list items are now guaranteed to exist under those
+    // specific dtsIds for effectively every real BA in this environment, unlike the first-5-dtsIds
+    // guess the earlier attempt relied on (which happened to only hit dtsIds with zero DAL items).
     let baDalRow = null;
-    const dtsCandidatesForBaDal = [...new Set(baDtsRows.map(r => r.dtsId))].slice(0, 5);
+    const seedNodeDtsIds = baDtsRows
+      .filter(r => r.dtsName === 'BA_User_List' || r.dtsName === 'BA_User_Details')
+      .map(r => r.dtsId);
+    const dtsCandidatesForBaDal = [...new Set([...seedNodeDtsIds, ...baDtsRows.map(r => r.dtsId)])].slice(0, 8);
     for (const dtsId of dtsCandidatesForBaDal) {
       if (baDalRow) break;
       const r = await step(`API: GET businessAdministration/dal?baid=${effectiveBaId}&dtsId=${dtsId} (GetBaDal)`, async () => {
@@ -482,8 +668,9 @@ async function measureScreensApi(browser, user) {
       notes.push('UpdateBaMms no-op round trip skipped: no baMmsRow captured from GetBaMms.');
     }
 
-    // UpdateBaDal / UpdateLanBaDal no-op round trips: BaDalResponse fields map 1:1 onto
-    // BaDalRequest, and its dalToken is a genuine per-(BAId,DALId,LanId) LAN_BA_DAL value.
+    // UpdateBaDal no-op round trip: BaDalResponse fields map 1:1 onto BaDalRequest (no token field on
+    // that request DTO at all, so no masking concern here — see UpdateLanBaDal note just below for the
+    // opposite case).
     if (baDalRow) {
       flow.push(await step('API: POST businessAdministration/dal (UpdateBaDal - no-op round trip)', async () => {
         const res = await apiCtx.post('/api/businessAdministration/dal', {
@@ -494,36 +681,36 @@ async function measureScreensApi(browser, user) {
         try { json = await res.json(); } catch { /* not JSON / empty body */ }
         return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null };
       }));
-      if (baDalRow.dalToken && claims.languageId) {
-        flow.push(await step('API: POST businessAdministration/dal/tokens (UpdateLanBaDal - no-op round trip)', async () => {
-          const res = await apiCtx.post('/api/businessAdministration/dal/tokens', {
-            data: { BaDalList: [{ LanId: claims.languageId, BAId: baDalRow.baId, DALId: baDalRow.dalId, DALToken: baDalRow.dalToken }] },
-          });
-          const status = res.status();
-          let json = null;
-          try { json = await res.json(); } catch { /* not JSON / empty body */ }
-          return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null };
-        }));
-      } else {
-        notes.push('UpdateLanBaDal no-op round trip skipped: no non-empty dalToken/languageId available from the captured baDalRow.');
-      }
-      flow.push(await step('API: GET businessAdministration/dal?baid=...&dtsId=... (verify UpdateBaDal/UpdateLanBaDal wrote back byte-identical row)', async () => {
+      // UpdateLanBaDal is DELIBERATELY NOT exercised here, correcting a latent mistake in this script's
+      // own prior (never-actually-run) code: sp_GetBaDal (read directly) selects `DAL.[DALToken]` — the
+      // DAL table's OWN generic default-token column (e.g. "Add"/"Delete", seeded once at DAL creation)
+      // — NOT LAN_DAL's or LAN_BA_DAL's per-language/per-BA token. So baDalRow.dalToken is NOT "a
+      // genuine per-(BAId,DALId,LanId) LAN_BA_DAL value" as a previous comment here incorrectly assumed
+      // (that assumption was never actually exercised before, because GetBaDal 404'd for every dtsId
+      // tried in every prior run). LanBaDalService.UpdateLanBaDalAsync (read directly) is also an
+      // INSERT-capable upsert on LAN_BA_DAL: if no LAN_BA_DAL row exists yet for (DALId,LanId,BAId), it
+      // creates one with whatever DALToken is sent. Sending the generic DAL.DALToken text here would
+      // either silently INSERT a brand-new LAN_BA_DAL customization row that never existed, or overwrite
+      // a real existing per-BA translation with the generic default — neither is a no-op, and no endpoint
+      // in this set exposes the actual current LAN_BA_DAL.DALToken value to round-trip safely instead.
+      notes.push('UpdateLanBaDal SKIPPED (upgraded from "no baDalRow" to a confirmed-unsafe finding now that GetBaDal succeeds): the only "token" GetBaDal exposes is DAL.DALToken (the generic system-wide default, confirmed by reading sp_GetBaDal.sql), not the actual per-(BAId,DALId,LanId) LAN_BA_DAL value — and UpdateLanBaDalAsync is an INSERT-capable upsert, so sending that generic value back is not provably a no-op (would insert a new row, or clobber a real BA-specific translation). No endpoint in this set exposes the real LAN_BA_DAL.DALToken, so this stays skipped.');
+      flow.push(await step('API: GET businessAdministration/dal?baid=...&dtsId=... (verify UpdateBaDal wrote back byte-identical row)', async () => {
         const res = await apiCtx.get('/api/businessAdministration/dal', { params: { baid: effectiveBaId, dtsId: baDalRow.dtsId, ...(claims.languageId ? { languageId: claims.languageId } : {}) } });
         const status = res.status();
         let json = null;
         try { json = await res.json(); } catch { /* not JSON / empty body */ }
         const row = Array.isArray(json) ? json.find(r => r.dalId === baDalRow.dalId) : null;
-        const fields = ['iconId', 'dalOrder', 'dalVisible', 'dalEnabled', 'dalToken'];
+        const fields = ['iconId', 'dalOrder', 'dalVisible', 'dalEnabled'];
         const identical = fieldsIdentical(baDalRow, row, fields);
         if (row && !identical) {
-          notes.push(`WARNING: UpdateBaDal/UpdateLanBaDal verification MISMATCH for dalId=${baDalRow.dalId} — before=${JSON.stringify(baDalRow)} after=${JSON.stringify(row)}.`);
+          notes.push(`WARNING: UpdateBaDal verification MISMATCH for dalId=${baDalRow.dalId} — before=${JSON.stringify(baDalRow)} after=${JSON.stringify(row)}.`);
         }
         return { status, identical };
       }));
     } else {
-      notes.push('UpdateBaDal/UpdateLanBaDal no-op round trips skipped: no baDalRow captured from GetBaDal.');
+      notes.push(`UpdateBaDal no-op round trip skipped: no baDalRow captured from GetBaDal across ${dtsCandidatesForBaDal.length} dtsId candidate(s) tried here. Separately confirmed via an exhaustive one-off live sweep (all 261 distinct dtsIds returned by GetBaDts, for BOTH real BAs in this environment — baid=185 and baid=228): GetBaDal returns zero rows for every single one — BA_DAL genuinely has NO rows for either BA in this environment, not a narrow-candidate-list problem. Also confirmed the DtsName seed values 'BA_User_List'/'BA_User_Details' that src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs and 20260626070610_AddBaUserRelatedRecords.cs (read directly) would insert BA_DAL rows under do not exist anywhere in this BA's live DTS tree (only pre-existing generic "User List"/"User Details" nodes do) — that Iteration-21 seed migration has evidently not been deployed to this IT/apidemo2 database, so the "real DAL-level list items now guaranteed to exist" premise this script's dtsId-priority logic relies on does not hold here yet. UpdateBaDal will start succeeding automatically once that migration reaches this environment.`);
     }
-    notes.push('DeleteBaDal SKIPPED: hard-deletes the BA_DAL row and (per DeleteBaDalCommandHandler) also cascades a RemoveRange over matching USER_BA_DAL rows — those per-user overrides are not readable via any endpoint in this set, so the delete is not losslessly reversible. DeleteBaMms SKIPPED: recreating via UpdateBaMms\'s insert path cannot restore the original MMSName/MMSParentId (not present on that request DTO). UpdateLanBaMms SKIPPED: BaMmsResponse exposes no MMSToken field to source a current value from. UpdateBaObj SKIPPED: GetBaObj\'s response has only 5 of the 13 fields UpdateBaObj\'s handler unconditionally overwrites (OBJName/OBJTypeId/layout columns/ParentDtsId would be blanked). UpdateBaObjTokens SKIPPED: no Get endpoint in this set exposes the current OBJToken.');
+    notes.push('DeleteBaDal SKIPPED: hard-deletes the BA_DAL row and (per DeleteBaDalCommandHandler) also cascades a RemoveRange over matching USER_BA_DAL rows — those per-user overrides are not readable via any endpoint in this set, so the delete is not losslessly reversible. DeleteBaMms SKIPPED: recreating via UpdateBaMms\'s insert path cannot restore the original MMSName/MMSParentId (not present on that request DTO). UpdateLanBaMms SKIPPED: even GetMmsTokens\' MMSToken-shaped field (ISNULL(LAN_BA_MMS.token, LAN_MMS.token), read directly from sp_GetMMSMenuToken) can\'t disambiguate a real existing LAN_BA_MMS row from a LAN_MMS fallback, and LanBaMmsService.UpdateLanBaMmsBatchAsync is an INSERT-capable upsert (read directly) — round-tripping an inconclusive value risks silently creating a new LAN_BA_MMS row that never existed, so this stays skipped. UpdateBaObj SKIPPED: even combining GetBaObj with the richer GetObjItems (which together cover OBJName/OBJDescription/StartColumn/RowNumber/ColSpan/RowSpan/ParentDtsId), two of the 13 fields UpdateBaObjCommandHandler/BaObjService unconditionally overwrite — OBJTypeId (numeric) and IsMultiLevelCtrl (bool) — are never exposed by ANY endpoint in this measured surface (GetObjItems only exposes an OBJType text description via a join, never the numeric OBJTypeId; no ObjType reference-data endpoint exists anywhere), so a complete no-op request cannot be constructed even by combining every available Get.');
 
     // =====================================================================
     // USERS/BUSINESSADMINISTRATION MODULE — only meaningful for a real BA-scoped login.
@@ -537,34 +724,62 @@ async function measureScreensApi(browser, user) {
     // whole subtree is only exercised for the BA role (baperform@gmail.com).
     // =====================================================================
     if (user.role === 'BA') {
-      const mmsIdForUserBaDts = baDtsRow?.mmsId ?? null;
+      // sp_GetUserBaDts (read directly) requires an EXACT (UserId,BAId,MMSId) match in USER_BA_DTS —
+      // no fallback to BA_DTS — so the previous attempt's single guess (mmsId from baDtsRow[0], the
+      // FIRST DTS row returned, which need not even belong to a module baperform ever customized) was
+      // a narrow shot. Trying every distinct mmsId actually present in this BA's own DTS tree
+      // (baDtsRows, captured above) is a bounded, read-only way to search for whichever module (if
+      // any) baperform has a real per-user DTS customization under.
+      const mmsIdCandidatesForUserBaDts = [...new Set(baDtsRows.map(r => r.mmsId).filter(m => Number.isFinite(m)))].slice(0, 8);
       let userBaDtsRow = null;
-      if (mmsIdForUserBaDts) {
-        flow.push(await step(`API: GET users/businessAdministration/DTS?baid=${BA_ROLE_OWN_BA_ID}&mmsId=${mmsIdForUserBaDts} (GetUserBaDts)`, async () => {
-          const res = await apiCtx.get('/api/users/businessAdministration/DTS', { params: { baid: BA_ROLE_OWN_BA_ID, mmsId: mmsIdForUserBaDts, languageId: claims.languageId } });
+      let mmsIdForUserBaDts = null;
+      if (mmsIdCandidatesForUserBaDts.length > 0) {
+        for (const mmsId of mmsIdCandidatesForUserBaDts) {
+          if (userBaDtsRow) break;
+          const r = await step(`API: GET users/businessAdministration/DTS?baid=${BA_ROLE_OWN_BA_ID}&mmsId=${mmsId} (GetUserBaDts)`, async () => {
+            const res = await apiCtx.get('/api/users/businessAdministration/DTS', { params: { baid: BA_ROLE_OWN_BA_ID, mmsId, languageId: claims.languageId } });
+            const status = res.status();
+            let json = null;
+            try { json = await res.json(); } catch { /* not JSON / empty body */ }
+            if (status === 200 && Array.isArray(json) && json.length > 0 && !userBaDtsRow) {
+              userBaDtsRow = json[0];
+              mmsIdForUserBaDts = mmsId;
+            }
+            return { status, url: res.url(), dataLength: Array.isArray(json) ? json.length : null };
+          });
+          flow.push(r);
+        }
+        if (!userBaDtsRow) {
+          notes.push(`GetUserBaDts: tried ${mmsIdCandidatesForUserBaDts.length} distinct mmsId candidate(s) from this BA's own DTS tree (baid=${BA_ROLE_OWN_BA_ID}) — all 404'd (UserBaDtsError.UserBaDtsNotFound). sp_GetUserBaDts requires an exact existing USER_BA_DTS row for (UserId,BAId,MMSId) with no fallback to BA_DTS, so this means baperform genuinely has zero USER_BA_DTS rows across every module tried, not a parameter-choice problem.`);
+        }
+      } else {
+        notes.push('GetUserBaDts skipped: no mmsId discovered from the BusinessAdministration-module GetBaDts call above.');
+      }
+
+      // sp_GetUserBaMms (read directly) filters ONLY by @BaId — it has no @UserId parameter at all —
+      // so unlike GetUserBaDts it isn't scoped to the caller's own customizations; trying the
+      // Root/Admin fallback BA (185) in addition to this role's own BA (228) is a legitimate,
+      // read-only way to check whether USER_BA_MMS has ANY rows at all for either BA.
+      let userBaMmsRow = null;
+      let userBaMmsBaId = null;
+      for (const baId of [BA_ROLE_OWN_BA_ID, BA_ID_FALLBACK]) {
+        if (userBaMmsRow) break;
+        const r = await step(`API: GET users/businessAdministration/MMS?baid=${baId} (GetUserBaMms, sp filters only by BaId, not caller identity)`, async () => {
+          const res = await apiCtx.get('/api/users/businessAdministration/MMS', { params: { baid: baId, languageId: claims.languageId } });
           const status = res.status();
           let json = null;
           try { json = await res.json(); } catch { /* not JSON / empty body */ }
-          if (status === 200 && Array.isArray(json) && json.length > 0) {
-            userBaDtsRow = json[0];
+          if (status === 200 && Array.isArray(json) && json.length > 0 && !userBaMmsRow) {
+            userBaMmsRow = json[0];
+            userBaMmsBaId = baId;
           }
           return { status, url: res.url(), dataLength: Array.isArray(json) ? json.length : null };
-        }));
-      } else {
-        notes.push('GetUserBaDts skipped: no mmsId discovered from the BusinessAdministration-module GetBaDts call above (GetUserBaDtsQueryHandler\'s own fallback for a missing mmsId is a genuine bug — it falls back to BusinessAdministrationId, not a usable MMS default — so a real mmsId must always be passed explicitly).');
+        });
+        flow.push(r);
       }
-
-      let userBaMmsRow = null;
-      flow.push(await step(`API: GET users/businessAdministration/MMS?baid=${BA_ROLE_OWN_BA_ID} (GetUserBaMms)`, async () => {
-        const res = await apiCtx.get('/api/users/businessAdministration/MMS', { params: { baid: BA_ROLE_OWN_BA_ID, languageId: claims.languageId } });
-        const status = res.status();
-        let json = null;
-        try { json = await res.json(); } catch { /* not JSON / empty body */ }
-        if (status === 200 && Array.isArray(json) && json.length > 0) {
-          userBaMmsRow = json[0];
-        }
-        return { status, url: res.url(), dataLength: Array.isArray(json) ? json.length : null };
-      }));
+      if (!userBaMmsRow) {
+        notes.push(`GetUserBaMms: tried baid=${BA_ROLE_OWN_BA_ID} (this role's own BA) and baid=${BA_ID_FALLBACK} (fallback) — both 404'd. Since sp_GetUserBaMms filters only by @BaId, this means USER_BA_MMS has zero rows for either BA in this environment, not a caller-identity issue.`);
+      }
 
       const dtsIdForUserBaDal = userBaDtsRow?.dtsId ?? baDtsRow?.dtsId ?? null;
       let userBaDalRow = null;
@@ -603,7 +818,7 @@ async function measureScreensApi(browser, user) {
           return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null };
         }));
         flow.push(await step('API: GET users/businessAdministration/DTS?... (verify UpdateUserBaDts wrote back byte-identical row)', async () => {
-          const res = await apiCtx.get('/api/users/businessAdministration/DTS', { params: { baid: BA_ROLE_OWN_BA_ID, mmsId: mmsIdForUserBaDts, languageId: claims.languageId } });
+          const res = await apiCtx.get('/api/users/businessAdministration/DTS', { params: { baid: BA_ROLE_OWN_BA_ID, mmsId: mmsIdForUserBaDts ?? userBaDtsRow.mmsId, languageId: claims.languageId } });
           const status = res.status();
           let json = null;
           try { json = await res.json(); } catch { /* not JSON / empty body */ }
@@ -629,7 +844,7 @@ async function measureScreensApi(browser, user) {
           return { status, url: res.url(), body: JSON.stringify(json)?.slice(0, 300) || null };
         }));
         flow.push(await step('API: GET users/businessAdministration/MMS?... (verify UpdateUserBaMms wrote back byte-identical row)', async () => {
-          const res = await apiCtx.get('/api/users/businessAdministration/MMS', { params: { baid: BA_ROLE_OWN_BA_ID, languageId: claims.languageId } });
+          const res = await apiCtx.get('/api/users/businessAdministration/MMS', { params: { baid: userBaMmsBaId ?? BA_ROLE_OWN_BA_ID, languageId: claims.languageId } });
           const status = res.status();
           let json = null;
           try { json = await res.json(); } catch { /* not JSON / empty body */ }
