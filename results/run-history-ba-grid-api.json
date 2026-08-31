@@ -1,0 +1,48 @@
+{
+  "description": "Rolling history of FlexForce Business Administration (BA) Grid backend/API response-timing runs (measure-ba-grid-api.mjs: BA Grid list x2 variants, create/update/delete cycle) — parallel to results/run-history-api.json (License Management), but for the BA module. Append one entry per completed, trustworthy run.",
+  "baseline": {
+    "establishedOn": "2026-08-31",
+    "environment": "IT (hrm2-uidemo2-it.h2software.nl)",
+    "licIdUsed": 110,
+    "runLabels": ["ba-grid-smoke-test-2", "ba-grid-dpc-run", "ba-grid-client-retry"],
+    "note": "First full-coverage (6/6 roles) BA Grid timing run, taken before any BA Grid performance work. Use this as the 'before' side of any future before/after comparison — re-run measure-ba-grid-api.mjs (or ROLE_FILTER=<role> node measure-ba-grid-api.mjs <label>) and diff each role's business-step ms against the table below.",
+    "businessStepMs": {
+      "Root":        { "gridP1S20": 567, "gridP1S100Search": 177, "create": 224, "update": 193, "delete": 199 },
+      "Admin":       { "gridP1S20": 174, "gridP1S100Search": 175, "create": 230, "update": 179, "delete": 281 },
+      "Distributor": { "gridP1S20": 563, "gridP1S100Search": 177, "create": 658, "update": 180, "delete": 266 },
+      "Partner":     { "gridP1S20": 176, "gridP1S100Search": 174, "create": 230, "update": 179, "delete": 205 },
+      "Client":      { "gridP1S20": 656, "gridP1S100Search": 206, "create": 272, "update": 212, "delete": 232 },
+      "BA":          { "gridP1S20": null, "gridP1S100Search": null, "create": null, "update": null, "delete": null, "note": "not applicable — BA role is rejected with 400 BA.Unauthorized by design" }
+    }
+  },
+  "runs": [
+    {
+      "runLabel": "ba-grid-smoke-test-2",
+      "runTimestamp": "1788149082022",
+      "resultsFile": "ba-grid-smoke-test-2-1788149082022.json",
+      "environment": "IT (hrm2-uidemo2-it.h2software.nl)",
+      "licIdUsed": 110,
+      "rolesRun": ["Root", "Admin", "BA"],
+      "summary": "First trustworthy run after fixing a create-response-parsing bug (initial smoke test left orphan BA rows 386/387, manually cleaned up). Root/Admin: grid list ~170-570ms, create ~220-230ms, update ~180-190ms, delete ~200-280ms — all well within normal range. BA role: grid and create both return 400 BA.Unauthorized as expected (BA members are not authorized to manage the BA list under their own Client)."
+    },
+    {
+      "runLabel": "ba-grid-dpc-run",
+      "runTimestamp": "1788150831538",
+      "resultsFile": "ba-grid-dpc-run-1788150831538.json",
+      "environment": "IT (hrm2-uidemo2-it.h2software.nl)",
+      "licIdUsed": 110,
+      "rolesRun": ["Distributor", "Partner"],
+      "summary": "Distributor and Partner both succeeded cleanly against the same licId=110 branch (each is scoped to the same Admin(104)->Distributor(106)->Partner(109)->Client(110) test hierarchy, confirmed via discover-role-own-client.mjs before running). Grid list 174-658ms, create/update/delete 180-660ms, all create/delete cycles confirmed self-cleaning (BA ids 390, 391 created then deleted). Distributor's create (658ms) is the slowest business call recorded so far — plausibly a cold-start effect, being the first API call issued in this run's process.",
+      "note": "The Client role was also attempted in this same invocation but hit the login rate limit (5 req/min, per CLAUDE.md) — its login returned 429 and everything downstream was a bogus 401, not real timing data. Discarded; see ba-grid-client-retry below for the valid Client run."
+    },
+    {
+      "runLabel": "ba-grid-client-retry",
+      "runTimestamp": "1788150953196",
+      "resultsFile": "ba-grid-client-retry-1788150953196.json",
+      "environment": "IT (hrm2-uidemo2-it.h2software.nl)",
+      "licIdUsed": 110,
+      "rolesRun": ["Client"],
+      "summary": "Re-run after waiting out the login rate-limit window. Clean result: login 200, grid list 206-656ms, create/update/delete 212-272ms, BA id 392 created then deleted successfully."
+    }
+  ]
+}

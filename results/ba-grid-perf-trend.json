@@ -1,0 +1,306 @@
+{
+  "runs": [
+    {
+      "runStamp": "ba-grid-baseline-2026-08-31",
+      "date": "2026-08-31",
+      "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+      "combinedResultsFile": "ba-grid-baseline-combined.json",
+      "release": {
+        "releaseId": "ba-grid-baseline-main",
+        "confirmedSha": "417964c7",
+        "approxSha": null,
+        "confirmedBy": "FlexForce_BE main branch fast-forwarded to 417964c7 immediately before this run; GetBusinessAdministrationGrid.cs confirmed present at that commit"
+      },
+      "steps": [
+        {
+          "role": "Root",
+          "label": "Page Load - Sign In page",
+          "ms": 4129,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "Login (API response)",
+          "ms": 993,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "Post-login redirect/home render",
+          "ms": 792,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 567,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 177,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "API: POST businessAdministration (create)",
+          "ms": 224,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "API: POST businessAdministration (update)",
+          "ms": 193,
+          "ok": true
+        },
+        {
+          "role": "Root",
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 199,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "Page Load - Sign In page",
+          "ms": 3424,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "Login (API response)",
+          "ms": 893,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "Post-login redirect/home render",
+          "ms": 787,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 174,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 175,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "API: POST businessAdministration (create)",
+          "ms": 230,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "API: POST businessAdministration (update)",
+          "ms": 179,
+          "ok": true
+        },
+        {
+          "role": "Admin",
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 281,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "Page Load - Sign In page",
+          "ms": 3367,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "Login (API response)",
+          "ms": 911,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "Post-login redirect/home render",
+          "ms": 795,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 172,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 172,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "API: POST businessAdministration (create)",
+          "ms": 176,
+          "ok": true
+        },
+        {
+          "role": "BA",
+          "label": "API: POST businessAdministration (update)",
+          "ms": 0,
+          "ok": false
+        },
+        {
+          "role": "BA",
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 0,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "Page Load - Sign In page",
+          "ms": 3364,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "Login (API response)",
+          "ms": 1003,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "Post-login redirect/home render",
+          "ms": 791,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 563,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 177,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "API: POST businessAdministration (create)",
+          "ms": 658,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "API: POST businessAdministration (update)",
+          "ms": 180,
+          "ok": true
+        },
+        {
+          "role": "Distributor",
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 266,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "Page Load - Sign In page",
+          "ms": 3319,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "Login (API response)",
+          "ms": 955,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "Post-login redirect/home render",
+          "ms": 794,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 176,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 174,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "API: POST businessAdministration (create)",
+          "ms": 230,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "API: POST businessAdministration (update)",
+          "ms": 179,
+          "ok": true
+        },
+        {
+          "role": "Partner",
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 205,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "Page Load - Sign In page",
+          "ms": 3294,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "Login (API response)",
+          "ms": 943,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "Post-login redirect/home render",
+          "ms": 790,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 656,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 206,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "API: POST businessAdministration (create)",
+          "ms": 272,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "API: POST businessAdministration (update)",
+          "ms": 212,
+          "ok": true
+        },
+        {
+          "role": "Client",
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 232,
+          "ok": true
+        }
+      ]
+    }
+  ]
+}
