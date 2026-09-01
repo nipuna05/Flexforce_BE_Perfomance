@@ -1,0 +1,83 @@
+{
+  "runLabel": "seeders-rerun-2026-09-01",
+  "runTimestamp": "1788244031893",
+  "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+  "module": "Seeders (Objects data seeder + Language Tokens seeder) - api/objects/*, api/language-tokens/*",
+  "results": [
+    {
+      "role": "Root",
+      "username": "m.wanninayaka@h2compute.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 4559,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 1394,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 793,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST api/objects/update (UpdateExistingObjectsAsync - proven no-op, ObjectIds=[1,2,3,4,5,999999999], all other fields null)",
+          "ms": 682,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/objects/update",
+            "body": "{\"count\":0}",
+            "count": 0
+          }
+        },
+        {
+          "label": "API: POST api/language-tokens/update (UpdateExistingTokensAsync - guaranteed-absent sentinel keys)",
+          "ms": 329,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/language-tokens/update",
+            "body": "{\"count\":0}",
+            "count": 0
+          }
+        },
+        {
+          "label": "API: POST api/objects/update WITHOUT Authorization header (confirms anonymous access - same proven no-op payload)",
+          "ms": 195,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/objects/update",
+            "body": "{\"count\":0}",
+            "count": 0
+          }
+        }
+      ],
+      "notes": [
+        "Decoded JWT claims: userId=1. Neither seeder handler reads IUserContext at all (confirmed by reading ObjectDataSeeder.cs/LanguageObjectDataSeeder.cs in full) - there is no per-role branching to measure here, the Bearer token is attached purely for consistency with the other measure-*.mjs scripts.",
+        "POST api/objects/seed SKIPPED entirely (no live call attempted): SeedBulkObjectsAsync is insert-only, keyed purely by the caller-supplied ObjectId, and uses `SET IDENTITY_INSERT [Objects] ON` to let the caller dictate an arbitrary explicit ObjectId (confirmed in ObjectDataSeeder.cs) into the SAME small global `Objects` table that GetSignInTokensByLanguageIdQueryHandler.cs reads (`SELECT ObjectId FROM Objects WHERE Det_PageName=@PageName`) to render the SignIn/Landing/ForgotPassword/ResetPassword pages for every tenant, cached 10-20 minutes. A safe no-op here would require sending an ObjectId already known to exist (so the existing-id filter skips the insert) - but no GET/read endpoint anywhere exposes the raw numeric ObjectId (the only reads on this table, the 4 page-token endpoints, return ObjectName+Token, never ObjectId), so there is no way to source a verified-existing id, and this endpoint has no matching Delete/undo endpoint in its own route group (the Screens-phase DeleteObj/DeleteDet operate on the unrelated OBJ/LAN_OBJ/BA_OBJ table set, confirmed by comparing sp_GetObjItems.sql's columns against Object.cs's 4-column Objects entity - not the same physical table). A wrong guess creates a permanent, unlisted row in login-page-critical global content with no confirmed way back. Per the task's decision rule, this is exactly the \"ambiguous + global shared naming + no verify/undo path\" case that must be skipped.",
+        "Confirmed live: api/objects/update returned Count=0 as predicted from source — zero rows were written, whether or not any of the probed ObjectIds exist.",
+        "api/objects/update code-safety justification: ApplyUpdates (ObjectDataSeeder.cs) only mutates ObjectName when the request value is non-null/non-empty AND differs, ObjectType/Det_PageName only when HasValue AND differs. Sending all three as null for every ObjectId in the batch makes `changes` provably 0 per row, so `if (updatedCount > 0)` never passes and SaveChangesAsync is never invoked — proven safe before the call, not just verified after.",
+        "POST api/language-tokens/seed and POST api/language-tokens/seed-from-file BOTH SKIPPED entirely (no live call attempted, including the multipart file-upload variant): SeedBulkTokensAsync (which seed-from-file also calls, before its own UpdateExistingTokensAsync pass) UNCONDITIONALLY overwrites Token for any (LanguageId,ObjectId) key that already exists — `record.Token = existingToken.Token ?? throw ...` runs with no equality check first, unlike ObjectDataSeeder's update path — and INSERTS a brand-new row for any key that does not exist. Confirmed via FlexForceDbContext.cs/LanguageObject.cs that LanguageObjects has no FK constraint to Objects at all (the only migration touching such a constraint, Iteration 3's \"RemoveLanguageObjectAndObjectsTables\", DROPPED it and none since re-added it) — so there is no DB-level safety net that would reject a fabricated ObjectId either. Combined with the same \"no read endpoint exposes ObjectId\" gap documented for api/objects/seed above, there is no way to construct either (a) a guaranteed-non-colliding key (an insert would then permanently pollute the SignIn/Landing/ForgotPassword/ResetPassword content table) or (b) a byte-exact current Token value for a genuinely existing key (needed because the overwrite is unconditional). This is the highest-blast-radius write in this module and is fully skipped.",
+        "Confirmed live: api/language-tokens/update returned Count=0 as predicted — the sentinel keys matched no real row, so UpdateExistingTokensAsync (which has no insert path at all) wrote nothing.",
+        "api/language-tokens/update code-safety justification: unlike objects/update, this handler's Token equality check is NOT null-guarded (sending Token=null against a REAL existing key would overwrite real page text with null), so the no-op here is achieved differently — via (LanguageId,ObjectId) keys chosen to be certainly absent from the real table, so GetExistingTokensForBatchAsync's Contains-filtered SELECT returns zero rows and the method's only write path (ProcessBatchAsync, reached only for keys it already fetched) is never entered. This is a less representative latency measurement than a genuine matched-row update would be (deliberately, for safety) — it exercises the lookup query and the empty-batch short-circuit, not the compare-and-write path.",
+        "CONFIRMED LIVE (backend finding, not a script defect): api/objects/update accepted a completely unauthenticated request (no Authorization header at all) and returned 200. This live-confirms the source finding that LanguageTokens.cs/ObjectsDataseeder.cs's doc-comments claiming \"Requires administrator privileges\" are enforced nowhere — neither endpoint group calls .HasPermission()/.RequireAuthorization(), and the app has no authentication FallbackPolicy (services.AddAuthorization() in DependencyInjection.cs, no fallback). Reported as a discovered backend security finding; not fixed here (read-only measurement task)."
+      ]
+    }
+  ]
+}

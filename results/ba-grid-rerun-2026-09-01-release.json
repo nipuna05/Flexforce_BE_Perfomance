@@ -1,0 +1,6 @@
+{
+  "releaseId": "ba-grid-rerun-2026-09-01-not-yet-deployed",
+  "confirmedSha": null,
+  "approxSha": "417964c7",
+  "confirmedBy": "IT (hrm2-apidemo2-it.h2software.nl) is presumed UNCHANGED from the baseline run: the BE pipeline (hrm2-apidemo2.yml, definition 103) has not executed since 2026-07-15, and origin/main HEAD is still 417964c7, same as the baseline. The covering-index fix (commit 9644726a, 'Add covering index for BusinessAdministrations on LicId', on iteration/iteration_22) exists only in local source on nipuna/ba-grid-perf-testing after a local merge on 2026-09-01 - it has NOT been built or deployed to IT. This run measures the same pre-fix deployed code as the baseline; any differences from the baseline reflect run-to-run variance in the unindexed query, not the fix."
+}

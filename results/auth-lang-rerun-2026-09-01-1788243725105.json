@@ -1,0 +1,294 @@
+{
+  "runLabel": "auth-lang-rerun-2026-09-01",
+  "runTimestamp": "1788243725105",
+  "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+  "module": "Auths + Languages",
+  "results": [
+    {
+      "role": "N/A (anonymous)",
+      "username": null,
+      "flow": [
+        {
+          "label": "API: GET api/languages",
+          "ms": 2949,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/languages",
+            "count": 2,
+            "discoveredLanguageId": 2
+          }
+        },
+        {
+          "label": "API: GET api/languages/getForgotPasswordPageTokens",
+          "ms": 288,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/languages/getForgotPasswordPageTokens?LanguageId=2",
+            "count": 13
+          }
+        },
+        {
+          "label": "API: GET api/languages/getResetPasswordPageTokens",
+          "ms": 258,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/languages/getResetPasswordPageTokens?LanguageId=2",
+            "count": 25
+          }
+        },
+        {
+          "label": "API: GET api/languages/getSignInPageTokens",
+          "ms": 379,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/languages/getSignInPageTokens?LanguageId=2",
+            "count": 13
+          }
+        }
+      ],
+      "notes": [
+        "All four steps below are anonymous GET endpoints - no login/browser flow needed at all."
+      ]
+    },
+    {
+      "role": "Root",
+      "username": "m.wanninayaka@h2compute.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 4962,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 1341,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 797,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST api/auth/register",
+          "ms": 731,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/register",
+            "body": "256",
+            "throwawayEmail": "perf-auth-root-1788243736292@test.com",
+            "registeredUserId": 256
+          }
+        },
+        {
+          "label": "GET auth/{userId} - self",
+          "ms": 237,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/1",
+            "body": "{\"id\":1,\"userName\":\"m.wanninayaka@h2compute.com\",\"baId\":1,\"languageId\":2}"
+          }
+        },
+        {
+          "label": "GET auth/{userId} - cross-user (expect rejection)",
+          "ms": 213,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 500,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/256",
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc7231#section-6.6.1\",\"title\":\"Users.Unauthorized\",\"status\":500,\"detail\":\"You are not authorized to perform this action.\",\"traceId\":\"00-8d30da569187e3b9d5f4ba18165cd1ba-ad810e3921d91373-00\"}",
+            "crossCheckUserId": 256,
+            "crossCheckSource": "this role's own freshly-registered throwaway account (no earlier role available yet)"
+          }
+        },
+        {
+          "label": "API: POST api/auth/request-password-reset",
+          "ms": 931,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/request-password-reset",
+            "body": "{\"message\":\"If the email exists, a password reset link has been sent.\"}"
+          }
+        },
+        {
+          "label": "GET api/auth/validate/{token} (fake token, expect 404/400)",
+          "ms": 253,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/validate/perf-fake-reset-token-1788243738404",
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc7231#section-6.5.1\",\"title\":\"Users.InvalidResetToken\",\"status\":400,\"detail\":\"The password reset token is invalid or has expired\",\"traceId\":\"00-36afc10ebabe481af28fe5a89e965285-e54e9d84580f5c94-00\"}"
+          }
+        },
+        {
+          "label": "API: DELETE api/auth/delete-user/{userId} (cleanup throwaway account)",
+          "ms": 300,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/delete-user/256",
+            "body": "{\"message\":\"User deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "deleteConfirmed": true
+          }
+        },
+        {
+          "label": "API: POST api/auth/logout",
+          "ms": 223,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/logout",
+            "body": null
+          }
+        }
+      ],
+      "notes": [
+        "Decoded own userId from JWT payload: 1",
+        "Cross-user check target userId 256 sourced from: this role's own freshly-registered throwaway account (no earlier role available yet). GetUserByIdQueryHandler only allows query.UserId === caller's own UserId, so a non-2xx/Unauthorized-shaped response here is the EXPECTED, correct behavior - not a script failure.",
+        "Confirmed: DELETE of throwaway userId 256 returned 2xx with body \"true\"."
+      ]
+    },
+    {
+      "role": "Admin",
+      "username": "adminperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3688,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 1388,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 790,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST api/auth/register",
+          "ms": 726,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/register",
+            "body": "257",
+            "throwawayEmail": "perf-auth-admin-1788243748116@test.com",
+            "registeredUserId": 257
+          }
+        },
+        {
+          "label": "GET auth/{userId} - self",
+          "ms": 214,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/225",
+            "body": "{\"id\":225,\"userName\":\"adminperform@gmail.com\",\"baId\":0,\"languageId\":2}"
+          }
+        },
+        {
+          "label": "GET auth/{userId} - cross-user (expect rejection)",
+          "ms": 210,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 500,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/1",
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc7231#section-6.6.1\",\"title\":\"Users.Unauthorized\",\"status\":500,\"detail\":\"You are not authorized to perform this action.\",\"traceId\":\"00-8f68def0c349d3d0c373468a49e08271-4ff1786b5e961a45-00\"}",
+            "crossCheckUserId": 1,
+            "crossCheckSource": "previous role's (Root) own userId"
+          }
+        },
+        {
+          "label": "API: POST api/auth/request-password-reset",
+          "ms": 773,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/request-password-reset",
+            "body": "{\"message\":\"If the email exists, a password reset link has been sent.\"}"
+          }
+        },
+        {
+          "label": "GET api/auth/validate/{token} (fake token, expect 404/400)",
+          "ms": 241,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/validate/perf-fake-reset-token-1788243750039",
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc7231#section-6.5.1\",\"title\":\"Users.InvalidResetToken\",\"status\":400,\"detail\":\"The password reset token is invalid or has expired\",\"traceId\":\"00-c6bb00a70ec629848dcefdacdf8b69ac-8f7e78c858f456cf-00\"}"
+          }
+        },
+        {
+          "label": "API: DELETE api/auth/delete-user/{userId} (cleanup throwaway account)",
+          "ms": 228,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/delete-user/257",
+            "body": "{\"message\":\"User deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "deleteConfirmed": true
+          }
+        },
+        {
+          "label": "API: POST api/auth/logout",
+          "ms": 208,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/logout",
+            "body": null
+          }
+        }
+      ],
+      "notes": [
+        "Decoded own userId from JWT payload: 225",
+        "Cross-user check target userId 1 sourced from: previous role's (Root) own userId. GetUserByIdQueryHandler only allows query.UserId === caller's own UserId, so a non-2xx/Unauthorized-shaped response here is the EXPECTED, correct behavior - not a script failure.",
+        "Confirmed: DELETE of throwaway userId 257 returned 2xx with body \"true\"."
+      ]
+    }
+  ]
+}
