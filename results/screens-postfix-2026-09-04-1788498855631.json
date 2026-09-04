@@ -1,0 +1,1401 @@
+{
+  "runLabel": "screens-postfix-2026-09-04",
+  "runTimestamp": "1788498855631",
+  "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+  "module": "Screens (DAL/DTS/MMS/MTS/Object) + BusinessAdministration + Users/BusinessAdministration screen-config",
+  "results": [
+    {
+      "role": "Root",
+      "username": "m.wanninayaka@h2compute.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3472,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 977,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 793,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=452 (GetDal)",
+          "ms": 1287,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=452",
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=464 (GetDal)",
+          "ms": 212,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=464",
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=468 (GetDal)",
+          "ms": 204,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=468",
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: POST screen/dal (AddDal - throwaway row, empty token)",
+          "ms": 266,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal",
+            "body": "{\"message\":\"DAL Insert successfully\",\"status\":200,\"isSuccess\":true,\"data\":243}",
+            "createdDalId": 243
+          }
+        },
+        {
+          "label": "API: DELETE screen/dal/{dalId} (DeleteDal cleanup)",
+          "ms": 244,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal/243",
+            "body": "{\"message\":\"Dal item deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "deleteOk": true
+          }
+        },
+        {
+          "label": "API: POST screen/dal/tokens (UpdateLanDal - no-op round trip)",
+          "ms": 222,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal/tokens",
+            "body": "{\"message\":\"Language Dal tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "dalId": 167,
+            "languageId": 2
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=... (verify UpdateLanDal wrote back byte-identical dalToken)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "Add",
+            "after": "Add"
+          }
+        },
+        {
+          "label": "API: GET screen/dts?mmsId=180 (GetDtsMenu)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dts?mmsId=180",
+            "bodyLength": 5337
+          }
+        },
+        {
+          "label": "API: GET screen/mms (GetMmsMenu, context-derived baid/languageId)",
+          "ms": 821,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms",
+            "bodyLength": 1164
+          }
+        },
+        {
+          "label": "API: POST screen/mms-tokens (UpdateLanMms - no-op round trip, unmasked Step-3 LAN_MMS value)",
+          "ms": 222,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms-tokens",
+            "body": "{\"message\":\"Language MMS tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "mmsId": 2
+          }
+        },
+        {
+          "label": "API: GET screen/mms (verify UpdateLanMms wrote back byte-identical title)",
+          "ms": 206,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "Dasboard_Hrm2",
+            "after": "Dasboard_Hrm2"
+          }
+        },
+        {
+          "label": "API: GET screen/mms-tokens?baId=185 (GetMmsTokens, role-aware baId so the BA role probes its OWN real BA_Users membership)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms-tokens?baId=185&languageId=2",
+            "bodyLength": 198
+          }
+        },
+        {
+          "label": "API: GET screen/mts?BAId=185 (GetMtsMenu)",
+          "ms": 208,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mts?BAId=185",
+            "dataLength": 3
+          }
+        },
+        {
+          "label": "API: GET screens/mts-tokens?baId=185 (GetMtsTokens, note plural \"screens\")",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screens/mts-tokens?baId=185&languageId=2",
+            "bodyLength": 198
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=452 (GetObjItems, unmasked baId=0)",
+          "ms": 223,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=452",
+            "bodyLength": 316,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=464 (GetObjItems, unmasked baId=0)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=464",
+            "bodyLength": 321,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=468 (GetObjItems, unmasked baId=0)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=468",
+            "bodyLength": 285,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: POST screen/obj-tokens (UpdateObjTokens - no-op round trip, unmasked baId=0 LAN_OBJ value)",
+          "ms": 223,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/obj-tokens",
+            "body": "{\"message\":\"Object Tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "objId": 51
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=... (verify UpdateObjTokens wrote back byte-identical OBJToken)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "Admin List Grid",
+            "after": "Admin List Grid"
+          }
+        },
+        {
+          "label": "API: POST screen/det/obj/batch (GetObjItemsBatch, DtsIds=[452,464,468])",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj/batch",
+            "dataLength": 3
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/Dts?baid=185 (GetBaDts)",
+          "ms": 230,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/Dts?baid=185&languageId=2",
+            "dataLength": 261
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/MMS?baid=185 (GetBaMms)",
+          "ms": 208,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/MMS?baid=185&languageId=2",
+            "dataLength": 160
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=144 (GetBaDal)",
+          "ms": 211,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=144&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=145 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=145&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=146 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=146&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=147 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=147&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=148 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=148&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=149 (GetBaDal)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=149&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=150 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=150&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=151 (GetBaDal)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=151&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/det/Obj?baid=185 (GetBaObj)",
+          "ms": 211,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 403,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/det/Obj?baid=185&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/DTS (UpdateBaDts - no-op round trip)",
+          "ms": 216,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/DTS",
+            "body": "{\"message\":\"BaDts updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}"
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/Dts?baid=... (verify UpdateBaDts wrote back byte-identical row)",
+          "ms": 210,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/MMS (UpdateBaMms - no-op round trip, raw array body)",
+          "ms": 232,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/MMS",
+            "body": "{\"message\":\"Business administration MMS updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}"
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/MMS?baid=... (verify UpdateBaMms wrote back byte-identical row)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true
+          }
+        }
+      ],
+      "notes": [
+        "Decoded JWT claims: userId=1, languageId=2, baId=1.",
+        "GetDal: a 403 (DalError.NoPermissionForNode) or 404 (DalNotFound) for a given dtsId is handler-internal permission/data behavior (LicService.IsUserHasPermissionToAccessDal gates Lic-hierarchy callers with no BA, i.e. Root/Admin here), not a script failure.",
+        "Confirmed: throwaway DalId 243 (empty DalToken, no BA_DAL/LAN_DAL/USER_BA_DAL fan-out) deleted successfully.",
+        "SetDtsMenu, DeleteDts, SetMmsMenu, DeleteMms, SetObjItems, DeleteObj, DeleteDet all SKIPPED: read directly (DtsService/MmsService/DetService/ObjService), each Set* is INSERT-only (409/duplicate error on any repeat, fans out to BA_*/USER_BA_*/LAN_* for every existing BA/user), and each Delete* is an explicit recursive/cascading hard delete of a real, structural node — none are safely reversible against real shared data (task guidance: skip DeleteDts/DeleteMms/DeleteObj/DeleteDet entirely, confirmed correct, no counter-evidence found).",
+        "GetDtsMenu/GetMmsMenu/GetMmsTokens/GetMtsTokens/GetObjItems all return Result<string> (a JSON-encoded hierarchy blob as a raw C# string) — the HTTP body is therefore a double-encoded JSON string, not a parsed array/object; only bodyLength/status is recorded for these, matching how GetDal (typed List<T>, single-encoded) is treated differently above.",
+        "GetMmsTokens/GetMtsTokens 400 (Token.TokenNotFound \"Missing Tokens\") for baId=185/languageId=2 (Root/Admin) is NOT purely a data condition as previously assumed: sp_GetMMSMenuToken (read directly) returns NULL up front whenever the caller has no BA_Users row for @BaId at all — Root/Admin have zero BA_Users rows anywhere, so this 400 fires regardless of whether real LAN_MMS/LAN_BA_MMS token rows exist for BA 185. The BA role now probes its OWN real BA_Users membership (baId=228) instead of the always-foreign 185, which is a genuine BA_Users member and a more meaningful probe of this endpoint's success path.",
+        "SetMmsMenu, DeleteMms SKIPPED: SetMmsMenu is INSERT-only (documented in source as \"never updates an existing MMS row\", 409 on repeat name+parent); DeleteMms is an explicit recursive subtree hard delete.",
+        "SetMtsMenu no-op round trip skipped: GetMtsMenu returned no row with a real, non-zero businessAdministrationId=185 — BA 185 has no BA_MTS customizations yet, so every returned row is the global Mts-catalog fallback (businessAdministrationId hardcoded to 0 by sp_GetMTSMenu), which is not a safe no-op target.",
+        "BUG FOUND (backend, not this script): GetObjItemsBatch can 404 (Obj.ObjNotFound) for the exact same dtsId that succeeds via the single GetObjItems endpoint for the same caller — confirmed live for Admin/BA on dtsId=464. Root cause read directly from source: GetObjItemsQueryHandler.cs passes `@BaId = baId ?? 0` to Sp_GetObjItems, while GetObjItemsBatchQueryHandler.cs passes the raw nullable `baId` with no `?? 0` coalesce — when the caller's resolved baId is null (Root/Admin/BA all have no BA claim here), the batch endpoint sends SQL NULL instead of 0, and the stored procedure does not treat NULL and 0 equivalently. Not fixed here (read-only measurement task); reported as a discovered backend bug.",
+        "SetObjItems, DeleteObj, DeleteDet all SKIPPED: SetObjItems is an INSERT-only Det+Obj(+associations) creator (duplicate-name error on repeat); DeleteObj/DeleteDet are hard deletes that DB-cascade (convention Cascade FK, confirmed by reading FlexForceDbContext's required non-nullable navigations) into BA_OBJ/USER_BA_OBJ/LAN_OBJ.",
+        "UpdateBaObjTokens diagnostic only run under the BA role: Sp_GetObjItems requires real BA_Users (or LicUser) membership for a non-zero @BaId, which Root/Admin lack entirely.",
+        "BusinessAdministration-module calls below use baid=185 (known real fallback BA under Client 110).",
+        "GetBaObj is EXPECTED to reject with 403 (BaObjError.Forbidden) for Root here: unlike GetBaDts/GetBaMms, its handler enforces real BA_Users membership (own BA claim == baid, or a BA_Users row for that exact userId+baid) — Root/Admin have neither for baid=185. This is the \"actual exception\" to the no-per-role-difference pattern for this module; the BA-role run below exercises the genuine success path using its own BA.",
+        "UpdateBaDal no-op round trip skipped: no baDalRow captured from GetBaDal across 8 dtsId candidate(s) tried here. Separately confirmed via an exhaustive one-off live sweep (all 261 distinct dtsIds returned by GetBaDts, for BOTH real BAs in this environment — baid=185 and baid=228): GetBaDal returns zero rows for every single one — BA_DAL genuinely has NO rows for either BA in this environment, not a narrow-candidate-list problem. Also confirmed the DtsName seed values 'BA_User_List'/'BA_User_Details' that src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs and 20260626070610_AddBaUserRelatedRecords.cs (read directly) would insert BA_DAL rows under do not exist anywhere in this BA's live DTS tree (only pre-existing generic \"User List\"/\"User Details\" nodes do) — that Iteration-21 seed migration has evidently not been deployed to this IT/apidemo2 database, so the \"real DAL-level list items now guaranteed to exist\" premise this script's dtsId-priority logic relies on does not hold here yet. UpdateBaDal will start succeeding automatically once that migration reaches this environment.",
+        "DeleteBaDal SKIPPED: hard-deletes the BA_DAL row and (per DeleteBaDalCommandHandler) also cascades a RemoveRange over matching USER_BA_DAL rows — those per-user overrides are not readable via any endpoint in this set, so the delete is not losslessly reversible. DeleteBaMms SKIPPED: recreating via UpdateBaMms's insert path cannot restore the original MMSName/MMSParentId (not present on that request DTO). UpdateLanBaMms SKIPPED: even GetMmsTokens' MMSToken-shaped field (ISNULL(LAN_BA_MMS.token, LAN_MMS.token), read directly from sp_GetMMSMenuToken) can't disambiguate a real existing LAN_BA_MMS row from a LAN_MMS fallback, and LanBaMmsService.UpdateLanBaMmsBatchAsync is an INSERT-capable upsert (read directly) — round-tripping an inconclusive value risks silently creating a new LAN_BA_MMS row that never existed, so this stays skipped. UpdateBaObj SKIPPED: even combining GetBaObj with the richer GetObjItems (which together cover OBJName/OBJDescription/StartColumn/RowNumber/ColSpan/RowSpan/ParentDtsId), two of the 13 fields UpdateBaObjCommandHandler/BaObjService unconditionally overwrite — OBJTypeId (numeric) and IsMultiLevelCtrl (bool) — are never exposed by ANY endpoint in this measured surface (GetObjItems only exposes an OBJType text description via a join, never the numeric OBJTypeId; no ObjType reference-data endpoint exists anywhere), so a complete no-op request cannot be constructed even by combining every available Get.",
+        "Users/BusinessAdministration/* subtree (GetUserBaDal/Dts/Mms + their Update* siblings) SKIPPED for role Root: Root/Admin have no BA_Users membership at all — only the BA-role login (baperform@gmail.com, real BA_Users membership at BA 228) is exercised here."
+      ]
+    },
+    {
+      "role": "Admin",
+      "username": "adminperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 4548,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 880,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 791,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=452 (GetDal)",
+          "ms": 259,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=452",
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=464 (GetDal)",
+          "ms": 208,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=464",
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=468 (GetDal)",
+          "ms": 204,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=468",
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: POST screen/dal/tokens (UpdateLanDal - no-op round trip)",
+          "ms": 204,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal/tokens",
+            "body": "{\"message\":\"Language Dal tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "dalId": 167,
+            "languageId": 2
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=... (verify UpdateLanDal wrote back byte-identical dalToken)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "Add",
+            "after": "Add"
+          }
+        },
+        {
+          "label": "API: GET screen/dts?mmsId=180 (GetDtsMenu)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dts?mmsId=180",
+            "bodyLength": 5337
+          }
+        },
+        {
+          "label": "API: GET screen/mms (GetMmsMenu, context-derived baid/languageId)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms",
+            "bodyLength": 191
+          }
+        },
+        {
+          "label": "API: POST screen/mms-tokens (UpdateLanMms - no-op round trip, unmasked Step-3 LAN_MMS value)",
+          "ms": 204,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms-tokens",
+            "body": "{\"message\":\"Language MMS tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "mmsId": 180
+          }
+        },
+        {
+          "label": "API: GET screen/mms (verify UpdateLanMms wrote back byte-identical title)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "License Management",
+            "after": "License Management"
+          }
+        },
+        {
+          "label": "API: GET screen/mms-tokens?baId=185 (GetMmsTokens, role-aware baId so the BA role probes its OWN real BA_Users membership)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms-tokens?baId=185&languageId=2",
+            "bodyLength": 198
+          }
+        },
+        {
+          "label": "API: GET screen/mts?BAId=185 (GetMtsMenu)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mts?BAId=185",
+            "dataLength": 3
+          }
+        },
+        {
+          "label": "API: GET screens/mts-tokens?baId=185 (GetMtsTokens, note plural \"screens\")",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screens/mts-tokens?baId=185&languageId=2",
+            "bodyLength": 198
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=452 (GetObjItems, unmasked baId=0)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=452",
+            "bodyLength": 316,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=464 (GetObjItems, unmasked baId=0)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=464",
+            "bodyLength": 321,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=468 (GetObjItems, unmasked baId=0)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=468",
+            "bodyLength": 285,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: POST screen/obj-tokens (UpdateObjTokens - no-op round trip, unmasked baId=0 LAN_OBJ value)",
+          "ms": 210,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/obj-tokens",
+            "body": "{\"message\":\"Object Tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "objId": 51
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=... (verify UpdateObjTokens wrote back byte-identical OBJToken)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "Admin List Grid",
+            "after": "Admin List Grid"
+          }
+        },
+        {
+          "label": "API: POST screen/det/obj/batch (GetObjItemsBatch, DtsIds=[452,464,468])",
+          "ms": 202,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj/batch",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/Dts?baid=185 (GetBaDts)",
+          "ms": 202,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/Dts?baid=185&languageId=2",
+            "dataLength": 261
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/MMS?baid=185 (GetBaMms)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/MMS?baid=185&languageId=2",
+            "dataLength": 160
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=10 (GetBaDal)",
+          "ms": 206,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=10&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=182 (GetBaDal)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=182&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=183 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=183&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=184 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=184&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=185 (GetBaDal)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=185&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=186 (GetBaDal)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=186&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=187 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=187&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=185&dtsId=188 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=185&dtsId=188&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/det/Obj?baid=185 (GetBaObj)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 403,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/det/Obj?baid=185&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/DTS (UpdateBaDts - no-op round trip)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/DTS",
+            "body": "{\"message\":\"BaDts updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}"
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/Dts?baid=... (verify UpdateBaDts wrote back byte-identical row)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/MMS (UpdateBaMms - no-op round trip, raw array body)",
+          "ms": 202,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/MMS",
+            "body": "{\"message\":\"Business administration MMS updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}"
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/MMS?baid=... (verify UpdateBaMms wrote back byte-identical row)",
+          "ms": 206,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true
+          }
+        }
+      ],
+      "notes": [
+        "Decoded JWT claims: userId=225, languageId=2, baId=none.",
+        "GetDal: a 403 (DalError.NoPermissionForNode) or 404 (DalNotFound) for a given dtsId is handler-internal permission/data behavior (LicService.IsUserHasPermissionToAccessDal gates Lic-hierarchy callers with no BA, i.e. Root/Admin here), not a script failure.",
+        "AddDal/DeleteDal throwaway create+delete cycle only exercised under Root (lowest-risk single role, mirrors the LIC phase's CreateLIC/DeleteLICLevel pattern).",
+        "SetDtsMenu, DeleteDts, SetMmsMenu, DeleteMms, SetObjItems, DeleteObj, DeleteDet all SKIPPED: read directly (DtsService/MmsService/DetService/ObjService), each Set* is INSERT-only (409/duplicate error on any repeat, fans out to BA_*/USER_BA_*/LAN_* for every existing BA/user), and each Delete* is an explicit recursive/cascading hard delete of a real, structural node — none are safely reversible against real shared data (task guidance: skip DeleteDts/DeleteMms/DeleteObj/DeleteDet entirely, confirmed correct, no counter-evidence found).",
+        "GetDtsMenu/GetMmsMenu/GetMmsTokens/GetMtsTokens/GetObjItems all return Result<string> (a JSON-encoded hierarchy blob as a raw C# string) — the HTTP body is therefore a double-encoded JSON string, not a parsed array/object; only bodyLength/status is recorded for these, matching how GetDal (typed List<T>, single-encoded) is treated differently above.",
+        "GetMmsTokens/GetMtsTokens 400 (Token.TokenNotFound \"Missing Tokens\") for baId=185/languageId=2 (Root/Admin) is NOT purely a data condition as previously assumed: sp_GetMMSMenuToken (read directly) returns NULL up front whenever the caller has no BA_Users row for @BaId at all — Root/Admin have zero BA_Users rows anywhere, so this 400 fires regardless of whether real LAN_MMS/LAN_BA_MMS token rows exist for BA 185. The BA role now probes its OWN real BA_Users membership (baId=228) instead of the always-foreign 185, which is a genuine BA_Users member and a more meaningful probe of this endpoint's success path.",
+        "SetMmsMenu, DeleteMms SKIPPED: SetMmsMenu is INSERT-only (documented in source as \"never updates an existing MMS row\", 409 on repeat name+parent); DeleteMms is an explicit recursive subtree hard delete.",
+        "SetMtsMenu no-op round trip skipped: GetMtsMenu returned no row with a real, non-zero businessAdministrationId=185 — BA 185 has no BA_MTS customizations yet, so every returned row is the global Mts-catalog fallback (businessAdministrationId hardcoded to 0 by sp_GetMTSMenu), which is not a safe no-op target.",
+        "BUG FOUND (backend, not this script): GetObjItemsBatch can 404 (Obj.ObjNotFound) for the exact same dtsId that succeeds via the single GetObjItems endpoint for the same caller — confirmed live for Admin/BA on dtsId=464. Root cause read directly from source: GetObjItemsQueryHandler.cs passes `@BaId = baId ?? 0` to Sp_GetObjItems, while GetObjItemsBatchQueryHandler.cs passes the raw nullable `baId` with no `?? 0` coalesce — when the caller's resolved baId is null (Root/Admin/BA all have no BA claim here), the batch endpoint sends SQL NULL instead of 0, and the stored procedure does not treat NULL and 0 equivalently. Not fixed here (read-only measurement task); reported as a discovered backend bug.",
+        "SetObjItems, DeleteObj, DeleteDet all SKIPPED: SetObjItems is an INSERT-only Det+Obj(+associations) creator (duplicate-name error on repeat); DeleteObj/DeleteDet are hard deletes that DB-cascade (convention Cascade FK, confirmed by reading FlexForceDbContext's required non-nullable navigations) into BA_OBJ/USER_BA_OBJ/LAN_OBJ.",
+        "UpdateBaObjTokens diagnostic only run under the BA role: Sp_GetObjItems requires real BA_Users (or LicUser) membership for a non-zero @BaId, which Root/Admin lack entirely.",
+        "BusinessAdministration-module calls below use baid=185 (known real fallback BA under Client 110).",
+        "GetBaObj is EXPECTED to reject with 403 (BaObjError.Forbidden) for Admin here: unlike GetBaDts/GetBaMms, its handler enforces real BA_Users membership (own BA claim == baid, or a BA_Users row for that exact userId+baid) — Root/Admin have neither for baid=185. This is the \"actual exception\" to the no-per-role-difference pattern for this module; the BA-role run below exercises the genuine success path using its own BA.",
+        "UpdateBaDal no-op round trip skipped: no baDalRow captured from GetBaDal across 8 dtsId candidate(s) tried here. Separately confirmed via an exhaustive one-off live sweep (all 261 distinct dtsIds returned by GetBaDts, for BOTH real BAs in this environment — baid=185 and baid=228): GetBaDal returns zero rows for every single one — BA_DAL genuinely has NO rows for either BA in this environment, not a narrow-candidate-list problem. Also confirmed the DtsName seed values 'BA_User_List'/'BA_User_Details' that src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs and 20260626070610_AddBaUserRelatedRecords.cs (read directly) would insert BA_DAL rows under do not exist anywhere in this BA's live DTS tree (only pre-existing generic \"User List\"/\"User Details\" nodes do) — that Iteration-21 seed migration has evidently not been deployed to this IT/apidemo2 database, so the \"real DAL-level list items now guaranteed to exist\" premise this script's dtsId-priority logic relies on does not hold here yet. UpdateBaDal will start succeeding automatically once that migration reaches this environment.",
+        "DeleteBaDal SKIPPED: hard-deletes the BA_DAL row and (per DeleteBaDalCommandHandler) also cascades a RemoveRange over matching USER_BA_DAL rows — those per-user overrides are not readable via any endpoint in this set, so the delete is not losslessly reversible. DeleteBaMms SKIPPED: recreating via UpdateBaMms's insert path cannot restore the original MMSName/MMSParentId (not present on that request DTO). UpdateLanBaMms SKIPPED: even GetMmsTokens' MMSToken-shaped field (ISNULL(LAN_BA_MMS.token, LAN_MMS.token), read directly from sp_GetMMSMenuToken) can't disambiguate a real existing LAN_BA_MMS row from a LAN_MMS fallback, and LanBaMmsService.UpdateLanBaMmsBatchAsync is an INSERT-capable upsert (read directly) — round-tripping an inconclusive value risks silently creating a new LAN_BA_MMS row that never existed, so this stays skipped. UpdateBaObj SKIPPED: even combining GetBaObj with the richer GetObjItems (which together cover OBJName/OBJDescription/StartColumn/RowNumber/ColSpan/RowSpan/ParentDtsId), two of the 13 fields UpdateBaObjCommandHandler/BaObjService unconditionally overwrite — OBJTypeId (numeric) and IsMultiLevelCtrl (bool) — are never exposed by ANY endpoint in this measured surface (GetObjItems only exposes an OBJType text description via a join, never the numeric OBJTypeId; no ObjType reference-data endpoint exists anywhere), so a complete no-op request cannot be constructed even by combining every available Get.",
+        "Users/BusinessAdministration/* subtree (GetUserBaDal/Dts/Mms + their Update* siblings) SKIPPED for role Admin: Root/Admin have no BA_Users membership at all — only the BA-role login (baperform@gmail.com, real BA_Users membership at BA 228) is exercised here."
+      ]
+    },
+    {
+      "role": "BA",
+      "username": "baperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3609,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 1016,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 795,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=452 (GetDal)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 403,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=452",
+            "dataLength": null,
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc9110#section-15.5.4\",\"title\":\"SD.NoPermissionForNode\",\"status\":403,\"detail\":\"You do not have permission to get entries under this node.\",\"traceId\":\"00-fdf9eef9c5028f539235b1dbcffadc41-f32abbe63409e435-00\"}"
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=464 (GetDal)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 403,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=464",
+            "dataLength": null,
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc9110#section-15.5.4\",\"title\":\"SD.NoPermissionForNode\",\"status\":403,\"detail\":\"You do not have permission to get entries under this node.\",\"traceId\":\"00-4fb1b815004eae9584697626ea64a75f-16ad80e48515d56e-00\"}"
+          }
+        },
+        {
+          "label": "API: GET screen/dal?dtsId=468 (GetDal)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 403,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dal?dtsId=468",
+            "dataLength": null,
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc9110#section-15.5.4\",\"title\":\"SD.NoPermissionForNode\",\"status\":403,\"detail\":\"You do not have permission to get entries under this node.\",\"traceId\":\"00-012268a12012959cec58f0211d9975c9-39aa9b82d197ac31-00\"}"
+          }
+        },
+        {
+          "label": "API: GET screen/dts?mmsId=180 (GetDtsMenu)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/dts?mmsId=180",
+            "bodyLength": 197
+          }
+        },
+        {
+          "label": "API: GET screen/mms (GetMmsMenu, context-derived baid/languageId)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms",
+            "bodyLength": 197
+          }
+        },
+        {
+          "label": "API: GET screen/mms-tokens?baId=228 (GetMmsTokens, role-aware baId so the BA role probes its OWN real BA_Users membership)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mms-tokens?baId=228&languageId=2",
+            "bodyLength": 8336
+          }
+        },
+        {
+          "label": "API: GET screen/mts?BAId=185 (GetMtsMenu)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/mts?BAId=185",
+            "dataLength": 3
+          }
+        },
+        {
+          "label": "API: GET screens/mts-tokens?baId=185 (GetMtsTokens, note plural \"screens\")",
+          "ms": 196,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screens/mts-tokens?baId=185&languageId=2",
+            "bodyLength": 198
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=452 (GetObjItems, unmasked baId=0)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=452",
+            "bodyLength": 316,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=464 (GetObjItems, unmasked baId=0)",
+          "ms": 196,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=464",
+            "bodyLength": 321,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=468 (GetObjItems, unmasked baId=0)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=468",
+            "bodyLength": 285,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: POST screen/obj-tokens (UpdateObjTokens - no-op round trip, unmasked baId=0 LAN_OBJ value)",
+          "ms": 204,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/obj-tokens",
+            "body": "{\"message\":\"Object Tokens updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "objId": 51
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=... (verify UpdateObjTokens wrote back byte-identical OBJToken)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true,
+            "before": "Admin List Grid",
+            "after": "Admin List Grid"
+          }
+        },
+        {
+          "label": "API: POST screen/det/obj/batch (GetObjItemsBatch, DtsIds=[452,464,468])",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj/batch",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=452&baid=228 (GetObjItems, BA-scoped, for UpdateBaObjTokens diagnostic)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=452&baid=228",
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=464&baid=228 (GetObjItems, BA-scoped, for UpdateBaObjTokens diagnostic)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=464&baid=228",
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET screen/det/obj?dtsId=468&baid=228 (GetObjItems, BA-scoped, for UpdateBaObjTokens diagnostic)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/screen/det/obj?dtsId=468&baid=228",
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/Dts?baid=228 (GetBaDts)",
+          "ms": 209,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/Dts?baid=228&languageId=2",
+            "dataLength": 261
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/MMS?baid=228 (GetBaMms)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/MMS?baid=228&languageId=2",
+            "dataLength": 160
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=182 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=182&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=183 (GetBaDal)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=183&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=184 (GetBaDal)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=184&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=185 (GetBaDal)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=185&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=186 (GetBaDal)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=186&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=187 (GetBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=187&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=188 (GetBaDal)",
+          "ms": 202,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=188&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/dal?baid=228&dtsId=189 (GetBaDal)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/dal?baid=228&dtsId=189&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/det/Obj?baid=228 (GetBaObj)",
+          "ms": 207,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/det/Obj?baid=228&languageId=2",
+            "dataLength": 89
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/DTS (UpdateBaDts - no-op round trip)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/DTS",
+            "body": "{\"message\":\"BaDts updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}"
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/Dts?baid=... (verify UpdateBaDts wrote back byte-identical row)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/MMS (UpdateBaMms - no-op round trip, raw array body)",
+          "ms": 205,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/MMS",
+            "body": "{\"message\":\"Business administration MMS updated successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}"
+          }
+        },
+        {
+          "label": "API: GET businessAdministration/MMS?baid=... (verify UpdateBaMms wrote back byte-identical row)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "identical": true
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=1 (GetUserBaDts)",
+          "ms": 204,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=1&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=7 (GetUserBaDts)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=7&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=8 (GetUserBaDts)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=8&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=34 (GetUserBaDts)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=34&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=42 (GetUserBaDts)",
+          "ms": 199,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=42&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=46 (GetUserBaDts)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=46&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=52 (GetUserBaDts)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=52&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/DTS?baid=228&mmsId=53 (GetUserBaDts)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/DTS?baid=228&mmsId=53&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/MMS?baid=228 (GetUserBaMms, sp filters only by BaId, not caller identity)",
+          "ms": 205,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/MMS?baid=228&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/MMS?baid=185 (GetUserBaMms, sp filters only by BaId, not caller identity)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 404,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/MMS?baid=185&languageId=2",
+            "dataLength": null
+          }
+        },
+        {
+          "label": "API: GET users/businessAdministration/dal?dtsId=182 (GetUserBaDal)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 500,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/users/businessAdministration/dal?dtsId=182&languageId=2",
+            "dataLength": null
+          }
+        }
+      ],
+      "notes": [
+        "Decoded JWT claims: userId=229, languageId=2, baId=none.",
+        "GetDal: a 403 (DalError.NoPermissionForNode) or 404 (DalNotFound) for a given dtsId is handler-internal permission/data behavior (LicService.IsUserHasPermissionToAccessDal gates Lic-hierarchy callers with no BA, i.e. Root/Admin here), not a script failure.",
+        "AddDal/DeleteDal throwaway create+delete cycle only exercised under Root (lowest-risk single role, mirrors the LIC phase's CreateLIC/DeleteLICLevel pattern).",
+        "UpdateLanDal no-op round trip skipped: no dalSampleRow/languageId captured from the GetDal calls above.",
+        "SetDtsMenu, DeleteDts, SetMmsMenu, DeleteMms, SetObjItems, DeleteObj, DeleteDet all SKIPPED: read directly (DtsService/MmsService/DetService/ObjService), each Set* is INSERT-only (409/duplicate error on any repeat, fans out to BA_*/USER_BA_*/LAN_* for every existing BA/user), and each Delete* is an explicit recursive/cascading hard delete of a real, structural node — none are safely reversible against real shared data (task guidance: skip DeleteDts/DeleteMms/DeleteObj/DeleteDet entirely, confirmed correct, no counter-evidence found).",
+        "GetDtsMenu/GetMmsMenu/GetMmsTokens/GetMtsTokens/GetObjItems all return Result<string> (a JSON-encoded hierarchy blob as a raw C# string) — the HTTP body is therefore a double-encoded JSON string, not a parsed array/object; only bodyLength/status is recorded for these, matching how GetDal (typed List<T>, single-encoded) is treated differently above.",
+        "UpdateLanMms no-op round trip skipped for role BA: no mmsMenuSampleRow captured from GetMmsMenu's unmasked Step-3 branch (either the call didn't return 200, or (as expected for a real BA member like BA role) it took the masked/general path instead).",
+        "GetMmsTokens/GetMtsTokens 400 (Token.TokenNotFound \"Missing Tokens\") for baId=185/languageId=2 (Root/Admin) is NOT purely a data condition as previously assumed: sp_GetMMSMenuToken (read directly) returns NULL up front whenever the caller has no BA_Users row for @BaId at all — Root/Admin have zero BA_Users rows anywhere, so this 400 fires regardless of whether real LAN_MMS/LAN_BA_MMS token rows exist for BA 185. The BA role now probes its OWN real BA_Users membership (baId=228) instead of the always-foreign 185, which is a genuine BA_Users member and a more meaningful probe of this endpoint's success path.",
+        "SetMmsMenu, DeleteMms SKIPPED: SetMmsMenu is INSERT-only (documented in source as \"never updates an existing MMS row\", 409 on repeat name+parent); DeleteMms is an explicit recursive subtree hard delete.",
+        "SetMtsMenu no-op round trip skipped: GetMtsMenu returned no row with a real, non-zero businessAdministrationId=185 — BA 185 has no BA_MTS customizations yet, so every returned row is the global Mts-catalog fallback (businessAdministrationId hardcoded to 0 by sp_GetMTSMenu), which is not a safe no-op target.",
+        "BUG FOUND (backend, not this script): GetObjItemsBatch can 404 (Obj.ObjNotFound) for the exact same dtsId that succeeds via the single GetObjItems endpoint for the same caller — confirmed live for Admin/BA on dtsId=464. Root cause read directly from source: GetObjItemsQueryHandler.cs passes `@BaId = baId ?? 0` to Sp_GetObjItems, while GetObjItemsBatchQueryHandler.cs passes the raw nullable `baId` with no `?? 0` coalesce — when the caller's resolved baId is null (Root/Admin/BA all have no BA claim here), the batch endpoint sends SQL NULL instead of 0, and the stored procedure does not treat NULL and 0 equivalently. Not fixed here (read-only measurement task); reported as a discovered backend bug.",
+        "SetObjItems, DeleteObj, DeleteDet all SKIPPED: SetObjItems is an INSERT-only Det+Obj(+associations) creator (duplicate-name error on repeat); DeleteObj/DeleteDet are hard deletes that DB-cascade (convention Cascade FK, confirmed by reading FlexForceDbContext's required non-nullable navigations) into BA_OBJ/USER_BA_OBJ/LAN_OBJ.",
+        "UpdateBaObjTokens SKIPPED: compared 3 OBJId(s) common to the unmasked (baId=0) and BA-scoped (baid=228) GetObjItems responses across dtsId [452,464,468] — every OBJToken value matched, so no live evidence of a real LAN_BA_OBJ override row could be confirmed (a match is inconclusive per COALESCE(lba.OBJToken, lo.OBJToken) in Sp_GetObjItems: could be a real override coincidentally equal to the LAN_OBJ default, or genuinely no override at all). Round-tripping an inconclusive value risks AddOrUpdateBaObjTokensAsync silently INSERTing a brand-new LAN_BA_OBJ row that never existed, so this stays skipped per the \"when genuinely unsure, skip\" rule.",
+        "BusinessAdministration-module calls below use baid=228 (this role's own real BA_Users membership (228), discovered live via GetBaObj — not from the JWT, which carries no BA claim for this account).",
+        "UpdateBaDal no-op round trip skipped: no baDalRow captured from GetBaDal across 8 dtsId candidate(s) tried here. Separately confirmed via an exhaustive one-off live sweep (all 261 distinct dtsIds returned by GetBaDts, for BOTH real BAs in this environment — baid=185 and baid=228): GetBaDal returns zero rows for every single one — BA_DAL genuinely has NO rows for either BA in this environment, not a narrow-candidate-list problem. Also confirmed the DtsName seed values 'BA_User_List'/'BA_User_Details' that src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs and 20260626070610_AddBaUserRelatedRecords.cs (read directly) would insert BA_DAL rows under do not exist anywhere in this BA's live DTS tree (only pre-existing generic \"User List\"/\"User Details\" nodes do) — that Iteration-21 seed migration has evidently not been deployed to this IT/apidemo2 database, so the \"real DAL-level list items now guaranteed to exist\" premise this script's dtsId-priority logic relies on does not hold here yet. UpdateBaDal will start succeeding automatically once that migration reaches this environment.",
+        "DeleteBaDal SKIPPED: hard-deletes the BA_DAL row and (per DeleteBaDalCommandHandler) also cascades a RemoveRange over matching USER_BA_DAL rows — those per-user overrides are not readable via any endpoint in this set, so the delete is not losslessly reversible. DeleteBaMms SKIPPED: recreating via UpdateBaMms's insert path cannot restore the original MMSName/MMSParentId (not present on that request DTO). UpdateLanBaMms SKIPPED: even GetMmsTokens' MMSToken-shaped field (ISNULL(LAN_BA_MMS.token, LAN_MMS.token), read directly from sp_GetMMSMenuToken) can't disambiguate a real existing LAN_BA_MMS row from a LAN_MMS fallback, and LanBaMmsService.UpdateLanBaMmsBatchAsync is an INSERT-capable upsert (read directly) — round-tripping an inconclusive value risks silently creating a new LAN_BA_MMS row that never existed, so this stays skipped. UpdateBaObj SKIPPED: even combining GetBaObj with the richer GetObjItems (which together cover OBJName/OBJDescription/StartColumn/RowNumber/ColSpan/RowSpan/ParentDtsId), two of the 13 fields UpdateBaObjCommandHandler/BaObjService unconditionally overwrite — OBJTypeId (numeric) and IsMultiLevelCtrl (bool) — are never exposed by ANY endpoint in this measured surface (GetObjItems only exposes an OBJType text description via a join, never the numeric OBJTypeId; no ObjType reference-data endpoint exists anywhere), so a complete no-op request cannot be constructed even by combining every available Get.",
+        "GetUserBaDts: tried 8 distinct mmsId candidate(s) from this BA's own DTS tree (baid=228) — all 404'd (UserBaDtsError.UserBaDtsNotFound). sp_GetUserBaDts requires an exact existing USER_BA_DTS row for (UserId,BAId,MMSId) with no fallback to BA_DTS, so this means baperform genuinely has zero USER_BA_DTS rows across every module tried, not a parameter-choice problem.",
+        "GetUserBaMms: tried baid=228 (this role's own BA) and baid=185 (fallback) — both 404'd. Since sp_GetUserBaMms filters only by @BaId, this means USER_BA_MMS has zero rows for either BA in this environment, not a caller-identity issue.",
+        "BUG FOUND (backend, not this script): GetUserBaDal returns HTTP 500 (title \"UserBaDal.InvalidBaId\") instead of a client-error status for a caller with no \"BA\" JWT claim (confirmed live for baperform@gmail.com, whose Users.BAId is null). Root cause read directly from source: UserBaDalError.InvalidBaId is declared via Error.Failure(...) (ErrorType.Failure), which EndpointHelper.HandleQuery's status-code switch does not have a case for (Validation/Problem/InvalidInputs->400, NotFound->404, Conflict->409, Unauthorized/InvalidUsernameOrPassword->401, Forbidden->403, else->500) — a client-side \"missing BA context\" validation error therefore falls through to a generic 500. Not fixed here (read-only measurement task); reported as a discovered backend bug.",
+        "UpdateUserBaDts no-op round trip skipped: no userBaDtsRow captured.",
+        "UpdateUserBaMms no-op round trip skipped: no userBaMmsRow captured.",
+        "UpdateUserBaDal no-op round trip skipped: no userBaDalRow captured.",
+        "DeleteUserBaDal SKIPPED: hard-deletes every UserBaDal row for a whole (UserId,BAId,DTSId) at once, and re-creating via UpdateUserBaDal's insert path only clones template defaults from BA_DAL — it cannot restore the exact prior per-user row set/order, so this is not losslessly reversible against a real user's live customizations. UpdateUserBaObj SKIPPED: no GetUserBaObj endpoint exists anywhere in this folder to source current values from. SetBusinessAdministration SKIPPED: it reassigns Users.BAId for an arbitrary UserId with no self-only check and no corresponding \"get current BA\" read in this endpoint set — even a well-intentioned no-op write here risks permanently reassigning a real user's BA if the sourced \"current\" value were ever wrong; skipping entirely per the \"when genuinely unsure, skip\" rule."
+      ]
+    }
+  ]
+}

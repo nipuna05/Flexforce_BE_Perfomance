@@ -1,0 +1,6 @@
+{
+  "releaseId": "ba-grid-postfix-2026-09-04-deployed",
+  "confirmedSha": "2056e46b",
+  "approxSha": null,
+  "confirmedBy": "Confirmed via `az pipelines build list --definition-ids 103`: a FlexForce_BE pipeline run (hrm2-apidemo2.yml, deploys to hrm2-apidemo2-it.h2software.nl) succeeded on 2026-09-04 at sourceVersion 2056e46ba258b6a0de302c0b1b5869dd0028eaf4 - the merge commit for PR 5973 ('Add covering index for BusinessAdministrations on LicId'). Unlike the 2026-09-01 rerun, this fix is genuinely live on IT. PR 5973 bundles three changes: (1) IX_BusinessAdministrations covering index on LicId, (2) ThreadPool.SetMinThreads in Program.cs targeting login-burst latency spikes, (3) removal of a non-index-friendly .Trim() in CreateBusinessAdministrationCommandHandler's duplicate-name check."
+}
