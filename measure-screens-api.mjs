@@ -20,19 +20,26 @@ const DTS_ADMIN_LIST = 452;
 const DTS_CLIENT_LIST = 464;
 const DTS_BA_LIST = 468;
 
-// Confirmed live on IT: licId=110 ("Gas Client") has 2 real BA rows: 185 and 228. Used as the
-// explicit `baid` override for BusinessAdministration-module GET calls when the caller (Root/
-// Admin) has no BA of its own. A BA-role login (baperform@gmail.com) instead uses its OWN BA,
-// decoded from its JWT "BA" claim, since GetBaObj and the whole Users/BusinessAdministration/*
-// subtree enforce real BA_Users/USER_BA_* membership that Root/Admin do not have.
-const BA_ID_FALLBACK = 185;
+// The original fixture (BA 185, 228 — both children of the old LicId 110) was confirmed
+// gone from IT on 7 Sep 2026, the same "gone" as the LIC hierarchy nodes it lived under
+// (see check-lic-fixture.mjs / the 7 Sep dashboard findings). Replaced 7 Sep 2026 by
+// reusing the 2 BA rows (431, 432) provision-lic-fixture.mjs already seeded under the new
+// Client 1585, plus a genuine BA_Users membership row for baperform@gmail.com on BA 432
+// (provision-screens-ba-fixture.mjs, POST businessAdministration/users) — verified live via
+// GetBaUsers before adoption. Used as the explicit `baid` override for BusinessAdministration-
+// module GET calls when the caller (Root/Admin) has no BA of its own. A BA-role login
+// (baperform@gmail.com) instead uses its OWN BA, since GetBaObj and the whole
+// Users/BusinessAdministration/* subtree enforce real BA_Users/USER_BA_* membership that
+// Root/Admin do not have.
+const BA_ID_FALLBACK = 431;
 
 // baperform@gmail.com's Users.BAId column is null in this environment (no "BA" JWT claim at all —
 // confirmed live: decodeJwtClaims(...).baId comes back null for this account), so it cannot be
 // used to discover baperform's own BA. Its REAL membership lives only in the BA_Users join table
-// and was confirmed live via GetBaObj (the only endpoint here with a genuine BA_Users ownership
-// check): baid=185 -> 403 Forbidden, baid=228 -> 200 with real data. Hardcoded from that discovery.
-const BA_ROLE_OWN_BA_ID = 228;
+// and is confirmed live via GetBaUsers (see provision-screens-ba-fixture.mjs) and via GetBaObj
+// (the only endpoint here with a genuine BA_Users ownership check): baid=431 -> 403 Forbidden
+// (no membership), baid=432 -> 200 with real data.
+const BA_ROLE_OWN_BA_ID = 432;
 
 function now() {
   return process.hrtime.bigint();
@@ -331,7 +338,7 @@ async function measureScreensApi(browser, user) {
       const bodyText = await res.text();
       return { status, url: res.url(), bodyLength: bodyText?.length ?? 0 };
     }));
-    notes.push('GetMmsTokens/GetMtsTokens 400 (Token.TokenNotFound "Missing Tokens") for baId=185/languageId=2 (Root/Admin) is NOT purely a data condition as previously assumed: sp_GetMMSMenuToken (read directly) returns NULL up front whenever the caller has no BA_Users row for @BaId at all — Root/Admin have zero BA_Users rows anywhere, so this 400 fires regardless of whether real LAN_MMS/LAN_BA_MMS token rows exist for BA 185. The BA role now probes its OWN real BA_Users membership (baId=228) instead of the always-foreign 185, which is a genuine BA_Users member and a more meaningful probe of this endpoint\'s success path.');
+    notes.push(`GetMmsTokens/GetMtsTokens 400 (Token.TokenNotFound "Missing Tokens") for baId=${BA_ID_FALLBACK}/languageId=2 (Root/Admin) is NOT purely a data condition: sp_GetMMSMenuToken (read directly) returns NULL up front whenever the caller has no BA_Users row for @BaId at all — Root/Admin have zero BA_Users rows anywhere, so this 400 fires regardless of whether real LAN_MMS/LAN_BA_MMS token rows exist for BA ${BA_ID_FALLBACK}. The BA role now probes its OWN real BA_Users membership (baId=${BA_ROLE_OWN_BA_ID}) instead of the always-foreign ${BA_ID_FALLBACK}, which is a genuine BA_Users member and a more meaningful probe of this endpoint's success path.`);
     notes.push('SetMmsMenu, DeleteMms SKIPPED: SetMmsMenu is INSERT-only (documented in source as "never updates an existing MMS row", 409 on repeat name+parent); DeleteMms is an explicit recursive subtree hard delete.');
 
     // =====================================================================
@@ -348,10 +355,12 @@ async function measureScreensApi(browser, user) {
         // BA_MTS menu exists for @BAID; otherwise it falls back to the global Mts catalog and
         // hardcodes `0 AS BusinessAdministrationId` — a placeholder, not a real association. Only
         // treat a row as a safe SetMtsMenu no-op candidate when businessAdministrationId is the
-        // real, non-zero BA we asked for (confirmed live: BA 185 has no BA_MTS rows, so every row
-        // comes back with businessAdministrationId=0, and posting that back 409s — an FK violation
-        // on BAMts.BAId=0, not a real BusinessAdministration row — caught by the handler's outer
-        // catch-all as Mts.UnexpectedError).
+        // real, non-zero BA we asked for. Checked live each run, not assumed: the original fixture
+        // (BA 185) had no BA_MTS rows, so every row came back with businessAdministrationId=0, and
+        // posting that back 409s — an FK violation on BAMts.BAId=0, not a real BusinessAdministration
+        // row — caught by the handler's outer catch-all as Mts.UnexpectedError. The replacement
+        // fixture (BA 431, provisioned 7 Sep) is a freshly created BA and equally unlikely to have
+        // BA_MTS customizations, but this check re-confirms it live rather than assuming so.
         const realRow = json.find(r => r.businessAdministrationId === BA_ID_FALLBACK);
         if (realRow) {
           mtsSampleRow = { mtsId: realRow.id, businessAdministrationId: realRow.businessAdministrationId };
@@ -531,12 +540,12 @@ async function measureScreensApi(browser, user) {
     // =====================================================================
     // BUSINESSADMINISTRATION MODULE (Dal/Dts/Mms/Object, scoped by baid)
     // =====================================================================
-    // Root/Admin have no BA of their own, so they use the known real BA_ID_FALLBACK (185) as an
+    // Root/Admin have no BA of their own, so they use the known real BA_ID_FALLBACK as an
     // explicit override. A BA-role login uses its OWN BA (from the JWT), which matters for
     // GetBaObj specifically — it enforces real BA_Users membership, unlike its GetBaDts/GetBaMms
     // siblings, which only resolve/validate baId without checking caller ownership.
     const effectiveBaId = user.role === 'BA' ? BA_ROLE_OWN_BA_ID : BA_ID_FALLBACK;
-    notes.push(`BusinessAdministration-module calls below use baid=${effectiveBaId} (${user.role === 'BA' ? "this role's own real BA_Users membership (228), discovered live via GetBaObj — not from the JWT, which carries no BA claim for this account" : 'known real fallback BA under Client 110'}).`);
+    notes.push(`BusinessAdministration-module calls below use baid=${effectiveBaId} (${user.role === 'BA' ? `this role's own real BA_Users membership (${BA_ROLE_OWN_BA_ID}), discovered live via GetBaObj — not from the JWT, which carries no BA claim for this account` : 'known real fallback BA under Client 1585'}).`);
 
     let baDtsRow = null;
     let baDtsRows = [];
@@ -708,7 +717,7 @@ async function measureScreensApi(browser, user) {
         return { status, identical };
       }));
     } else {
-      notes.push(`UpdateBaDal no-op round trip skipped: no baDalRow captured from GetBaDal across ${dtsCandidatesForBaDal.length} dtsId candidate(s) tried here. Separately confirmed via an exhaustive one-off live sweep (all 261 distinct dtsIds returned by GetBaDts, for BOTH real BAs in this environment — baid=185 and baid=228): GetBaDal returns zero rows for every single one — BA_DAL genuinely has NO rows for either BA in this environment, not a narrow-candidate-list problem. Also confirmed the DtsName seed values 'BA_User_List'/'BA_User_Details' that src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs and 20260626070610_AddBaUserRelatedRecords.cs (read directly) would insert BA_DAL rows under do not exist anywhere in this BA's live DTS tree (only pre-existing generic "User List"/"User Details" nodes do) — that Iteration-21 seed migration has evidently not been deployed to this IT/apidemo2 database, so the "real DAL-level list items now guaranteed to exist" premise this script's dtsId-priority logic relies on does not hold here yet. UpdateBaDal will start succeeding automatically once that migration reaches this environment.`);
+      notes.push(`UpdateBaDal no-op round trip skipped: no baDalRow captured from GetBaDal across ${dtsCandidatesForBaDal.length} dtsId candidate(s) tried here. On the original fixture (baid=185/228, before the 7 Sep replacement), an exhaustive one-off live sweep of all 261 distinct dtsIds returned by GetBaDts found BA_DAL had zero rows for either BA — not a narrow-candidate-list problem — and traced it to the Iteration-21 seed migration (src/Infrastructure/Database/Migrations/SeedData/Iteration/21/20260701000001_AddDalForBaUserScreens.cs / 20260626070610_AddBaUserRelatedRecords.cs) evidently not being deployed to this IT/apidemo2 database. Not re-run as an exhaustive sweep against the replacement BA ${BA_ID_FALLBACK}/${BA_ROLE_OWN_BA_ID}, but the same root cause (an undeployed migration) would apply equally regardless of which BA is used, and this run's own candidate list coming up empty is consistent with that. UpdateBaDal will start succeeding automatically once that migration reaches this environment.`);
     }
     notes.push('DeleteBaDal SKIPPED: hard-deletes the BA_DAL row and (per DeleteBaDalCommandHandler) also cascades a RemoveRange over matching USER_BA_DAL rows — those per-user overrides are not readable via any endpoint in this set, so the delete is not losslessly reversible. DeleteBaMms SKIPPED: recreating via UpdateBaMms\'s insert path cannot restore the original MMSName/MMSParentId (not present on that request DTO). UpdateLanBaMms SKIPPED: even GetMmsTokens\' MMSToken-shaped field (ISNULL(LAN_BA_MMS.token, LAN_MMS.token), read directly from sp_GetMMSMenuToken) can\'t disambiguate a real existing LAN_BA_MMS row from a LAN_MMS fallback, and LanBaMmsService.UpdateLanBaMmsBatchAsync is an INSERT-capable upsert (read directly) — round-tripping an inconclusive value risks silently creating a new LAN_BA_MMS row that never existed, so this stays skipped. UpdateBaObj SKIPPED: even combining GetBaObj with the richer GetObjItems (which together cover OBJName/OBJDescription/StartColumn/RowNumber/ColSpan/RowSpan/ParentDtsId), two of the 13 fields UpdateBaObjCommandHandler/BaObjService unconditionally overwrite — OBJTypeId (numeric) and IsMultiLevelCtrl (bool) — are never exposed by ANY endpoint in this measured surface (GetObjItems only exposes an OBJType text description via a join, never the numeric OBJTypeId; no ObjType reference-data endpoint exists anywhere), so a complete no-op request cannot be constructed even by combining every available Get.');
 
@@ -758,8 +767,8 @@ async function measureScreensApi(browser, user) {
 
       // sp_GetUserBaMms (read directly) filters ONLY by @BaId — it has no @UserId parameter at all —
       // so unlike GetUserBaDts it isn't scoped to the caller's own customizations; trying the
-      // Root/Admin fallback BA (185) in addition to this role's own BA (228) is a legitimate,
-      // read-only way to check whether USER_BA_MMS has ANY rows at all for either BA.
+      // Root/Admin fallback BA (BA_ID_FALLBACK) in addition to this role's own BA (BA_ROLE_OWN_BA_ID)
+      // is a legitimate, read-only way to check whether USER_BA_MMS has ANY rows at all for either BA.
       let userBaMmsRow = null;
       let userBaMmsBaId = null;
       for (const baId of [BA_ROLE_OWN_BA_ID, BA_ID_FALLBACK]) {
@@ -802,7 +811,7 @@ async function measureScreensApi(browser, user) {
           return { status, url: res.url(), dataLength: Array.isArray(json) ? json.length : null };
         }));
       } else if (!claims.baId) {
-        notes.push('GetUserBaDal (and its UpdateUserBaDal sibling) SKIPPED for this role: unlike GetUserBaDts/GetUserBaMms, GetUserBaDalQueryHandler takes no baid override at all — it is scoped purely by _userContext.BusinessAdministrationId (the JWT "BA" claim). Confirmed live that baperform@gmail.com\'s JWT carries no "BA" claim (Users.BAId is null for this account; its real BA_Users membership at BA 228 is invisible to this specific handler), so this endpoint has no reachable success path with the available test accounts.');
+        notes.push(`GetUserBaDal (and its UpdateUserBaDal sibling) SKIPPED for this role: unlike GetUserBaDts/GetUserBaMms, GetUserBaDalQueryHandler takes no baid override at all — it is scoped purely by _userContext.BusinessAdministrationId (the JWT "BA" claim). Confirmed live that baperform@gmail.com's JWT carries no "BA" claim (Users.BAId is null for this account; its real BA_Users membership at BA ${BA_ROLE_OWN_BA_ID} is invisible to this specific handler), so this endpoint has no reachable success path with the available test accounts.`);
       } else {
         notes.push('GetUserBaDal skipped: no dtsId candidate available.');
       }
@@ -887,7 +896,7 @@ async function measureScreensApi(browser, user) {
 
       notes.push('DeleteUserBaDal SKIPPED: hard-deletes every UserBaDal row for a whole (UserId,BAId,DTSId) at once, and re-creating via UpdateUserBaDal\'s insert path only clones template defaults from BA_DAL — it cannot restore the exact prior per-user row set/order, so this is not losslessly reversible against a real user\'s live customizations. UpdateUserBaObj SKIPPED: no GetUserBaObj endpoint exists anywhere in this folder to source current values from. SetBusinessAdministration SKIPPED: it reassigns Users.BAId for an arbitrary UserId with no self-only check and no corresponding "get current BA" read in this endpoint set — even a well-intentioned no-op write here risks permanently reassigning a real user\'s BA if the sourced "current" value were ever wrong; skipping entirely per the "when genuinely unsure, skip" rule.');
     } else {
-      notes.push(`Users/BusinessAdministration/* subtree (GetUserBaDal/Dts/Mms + their Update* siblings) SKIPPED for role ${user.role}: Root/Admin have no BA_Users membership at all — only the BA-role login (baperform@gmail.com, real BA_Users membership at BA 228) is exercised here.`);
+      notes.push(`Users/BusinessAdministration/* subtree (GetUserBaDal/Dts/Mms + their Update* siblings) SKIPPED for role ${user.role}: Root/Admin have no BA_Users membership at all — only the BA-role login (baperform@gmail.com, real BA_Users membership at BA ${BA_ROLE_OWN_BA_ID}) is exercised here.`);
     }
 
   } catch (e) {
