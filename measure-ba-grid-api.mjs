@@ -13,11 +13,14 @@ fs.mkdirSync(resultsDir, { recursive: true });
 
 const API_BASE_URL = creds.baseUrl.replace('uidemo', 'apidemo');
 
-// Confirmed live on IT (see discover-client-licid.mjs): licId=110 ("Gas Client") is a real
-// Client-tier (LicType.Order=4) node under Admin(104) -> Distributor(106) -> Partner(109) ->
-// Client(110), and already has 2 BA rows (one owned by the baperform@gmail.com test account),
-// so the grid steps below measure a non-empty, realistic result rather than an empty page.
-const LIC_ID = 110;
+// The original fixture (licId=110, "Gas Client") was confirmed gone from IT on 7 Sep 2026
+// (see check-lic-fixture.mjs / 7 Sep dashboard finding: 404 InvalidSdNode, most likely a
+// data-cleanup sweep on the shared multi-tenant IT env, not a code regression). Replaced
+// 7 Sep 2026 via provision-lic-fixture.mjs (deliberate, reviewed, one-time recreation — not
+// an auto-heal-on-every-run): licId=1585 is a fresh Client-tier node under Admin(1582) ->
+// Distributor(1583) -> Partner(1584) -> Client(1585), seeded with 2 BA rows so the grid
+// steps below measure a non-empty, realistic result rather than an empty page.
+const LIC_ID = 1585;
 
 function now() {
   return process.hrtime.bigint();

@@ -4,8 +4,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Pre-flight check: verifies the hardcoded LIC hierarchy that measure-ba-grid-api.mjs
-// and measure-lic-api.mjs depend on (Admin 104 -> Distributor 106 -> Partner 109 ->
-// Client 110) still resolves on IT, BEFORE running either ~13-minute timed suite.
+// and measure-lic-api.mjs depend on (Admin 1582 -> Distributor 1583 -> Partner 1584 ->
+// Client 1585, provisioned 7 Sep 2026 via provision-lic-fixture.mjs after the original
+// Admin 104 -> ... -> Client 110 fixture disappeared from IT) still resolves, BEFORE
+// running either ~13-minute timed suite.
 //
 // Read-only. Creates nothing, deletes nothing, does not touch measure-*.mjs.
 // Exit code 0 = fixture intact, safe to run the timed suites.
@@ -20,10 +22,10 @@ const API_BASE_URL = creds.baseUrl.replace('uidemo', 'apidemo');
 const rootUser = creds.users.find((u) => u.role === 'Root');
 
 const FIXTURE = [
-  { licId: 104, label: 'Admin — "Gas Supplier Worldwide"' },
-  { licId: 106, label: 'Distributor — "Gas Supplier – USA"' },
-  { licId: 109, label: 'Partner — "Gas Supplier – Canada"' },
-  { licId: 110, label: 'Client — "Gas Client" (used by measure-ba-grid-api.mjs)' },
+  { licId: 1582, label: 'Admin (provisioned 7 Sep 2026)' },
+  { licId: 1583, label: 'Distributor (provisioned 7 Sep 2026)' },
+  { licId: 1584, label: 'Partner (provisioned 7 Sep 2026)' },
+  { licId: 1585, label: 'Client (provisioned 7 Sep 2026, 2 BA rows — used by measure-ba-grid-api.mjs)' },
 ];
 
 (async () => {

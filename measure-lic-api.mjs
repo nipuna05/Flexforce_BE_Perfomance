@@ -13,15 +13,19 @@ fs.mkdirSync(resultsDir, { recursive: true });
 
 const API_BASE_URL = creds.baseUrl.replace('uidemo', 'apidemo');
 
-// Confirmed live on IT (see discover-client-licid.mjs / task notes): a real, non-empty LIC
-// hierarchy branch — Admin(104, "Gas Supplier Worldwide") -> Distributor(106, "Gas Supplier -
-// USA") -> Partner(109, "Gas Supplier - Canada") -> Client(110, "Gas Client"). Used for all
-// read-only grid/lookup calls below. The mutating CreateLIC/CreateLicense cycle deliberately
-// does NOT create anything under Client 110 itself (see comment on that cycle) to avoid any
-// risk of touching this real, shared node's data.
-const ADMIN_LIC_ID = 104;
-const PARTNER_LIC_ID = 109;
-const CLIENT_LIC_ID = 110;
+// The original fixture — Admin(104) -> Distributor(106) -> Partner(109) -> Client(110) —
+// was confirmed gone from IT on 7 Sep 2026 (see check-lic-fixture.mjs / 7 Sep dashboard
+// finding: 404 InvalidSdNode on all four nodes, most likely a data-cleanup sweep on the
+// shared multi-tenant IT env, not a code regression — 54 other unrelated Admin-tier nodes
+// still resolved fine). Replaced 7 Sep 2026 via provision-lic-fixture.mjs (deliberate,
+// reviewed, one-time recreation — not an auto-heal-on-every-run) and nesting/BA-row
+// verified live before adopting these IDs. Used for all read-only grid/lookup calls below.
+// The mutating CreateLIC/CreateLicense cycle deliberately does NOT create anything under
+// Client 1585 itself (see comment on that cycle) to avoid any risk of touching this node's
+// seeded BA rows.
+const ADMIN_LIC_ID = 1582;
+const PARTNER_LIC_ID = 1584;
+const CLIENT_LIC_ID = 1585;
 
 // DTS tree for the License_Management module (MmsId=180), read live from
 // GET /api/screen/dts?mmsId=180 (see measure-api.mjs / discover-client-licid.mjs).
@@ -117,7 +121,7 @@ async function measureLicApi(browser, user) {
       return { status, url: res.url(), totalCount: json?.totalCount, dataLength: json?.data?.length };
     }));
 
-    flow.push(await step('API: POST license-mgt/grid (Distributor_List under Admin 104)', async () => {
+    flow.push(await step('API: POST license-mgt/grid (Distributor_List under Admin 1582)', async () => {
       const res = await apiCtx.post('/api/license-mgt/grid', {
         data: { startedDtsId: DTS_DISTRIBUTOR_LIST, parentLicId: ADMIN_LIC_ID, gridRequest: { page: 1, pageSize: 50 } },
       });
@@ -127,7 +131,7 @@ async function measureLicApi(browser, user) {
       return { status, url: res.url(), totalCount: json?.totalCount, dataLength: json?.data?.length };
     }));
 
-    flow.push(await step('API: POST license-mgt/grid (Client_List under Partner 109)', async () => {
+    flow.push(await step('API: POST license-mgt/grid (Client_List under Partner 1584)', async () => {
       const res = await apiCtx.post('/api/license-mgt/grid', {
         data: { startedDtsId: DTS_CLIENT_LIST, parentLicId: PARTNER_LIC_ID, gridRequest: { page: 1, pageSize: 50 } },
       });
@@ -176,7 +180,7 @@ async function measureLicApi(browser, user) {
     // The only LIC endpoint decorated with .RequireAuthorization() at the route level (all its
     // siblings are currently anonymous per a prior audit) — still calling it authenticated here,
     // same as every other step, just noting the difference.
-    flow.push(await step('API: POST license-mgt/licenses/grid (Client 110, authenticated)', async () => {
+    flow.push(await step('API: POST license-mgt/licenses/grid (Client 1585, authenticated)', async () => {
       if (!clientLicTypeId) {
         throw new Error('No clientLicTypeId discovered — cannot call GetLicenseGrid with a valid LicType.');
       }
@@ -192,9 +196,9 @@ async function measureLicApi(browser, user) {
 
     // ===================== SetLicUser add/remove-mapping cycle (Users/*) =====================
     // Mirrors the established pattern in measure-api.mjs: register a throwaway account, map it
-    // to the shared Admin node 104 (LicType discovered above, expected LicTypeId=13), read it
+    // to the shared Admin node 1582 (LicType discovered above, expected LicTypeId=13), read it
     // back via GetLicUsersGrid, then unmap (soft delete) + purge (permanent delete) + delete the
-    // throwaway account itself. Node 104 is real/shared but the row we add and remove is a
+    // throwaway account itself. Node 1582 is real/shared but the row we add and remove is a
         // brand-new throwaway user, so nothing pre-existing is touched.
     let registeredUserId = null;
     let mappedUserId = null;
@@ -218,7 +222,7 @@ async function measureLicApi(browser, user) {
         notes.push('Register step for the LicUser mapping cycle did not return a usable numeric userId — SetLicUser/GetLicUsersGrid/cleanup below will be attempted anyway with the throwaway email, but may not resolve to a real user.');
       }
 
-      flow.push(await step('API: POST license-mgt/user (SetLicUser - map throwaway user to Admin node 104)', async () => {
+      flow.push(await step('API: POST license-mgt/user (SetLicUser - map throwaway user to Admin node 1582)', async () => {
         if (!adminLicTypeId) {
           throw new Error('No adminLicTypeId discovered — cannot call SetLicUser with a valid LicType.');
         }
@@ -240,7 +244,7 @@ async function measureLicApi(browser, user) {
         notes.push('SetLicUser did not return a usable licUserId — GetLicUsersGrid verification and the DeleteLicUser cleanup below will be skipped/limited for this role.');
       }
 
-      flow.push(await step('API: POST license-mgt/users/grid (GetLicUsersGrid for Admin node 104)', async () => {
+      flow.push(await step('API: POST license-mgt/users/grid (GetLicUsersGrid for Admin node 1582)', async () => {
         if (!adminLicTypeId) {
           throw new Error('No adminLicTypeId discovered — cannot call GetLicUsersGrid with a valid LicType.');
         }
@@ -318,20 +322,19 @@ async function measureLicApi(browser, user) {
     // hard-deletes that exact row (plus any descendants/BusinessAdministrations — none exist for
     // a freshly created leaf), so create+delete of a throwaway leaf node is fully reversible.
     //
-    // The throwaway node is created as a new Client under the REAL Partner 109 ("Gas Supplier -
-    // Canada") rather than reusing the real Client 110 ("Gas Client") for the license-contract
-    // test below — CreateLicenseContractCommandHandler.ResolveOrCreateLicenseeAsync reuses (and
-    // RENAMES) an existing licensee Organization whenever a Contract with the same
-    // (LicensorRelationId, LicId) pair already exists, which real node 110 already has via its
-    // own live "Gas Client" contract. Creating a brand-new node guarantees no such existing
-    // Contract can collide, so the throwaway licensee Organization created here is always a new,
-    // separate row — never a rename of real data.
+    // The throwaway node is created as a new Client under Partner 1584 rather than reusing
+    // Client 1585 itself for the license-contract test below — CreateLicenseContractCommandHandler
+    // .ResolveOrCreateLicenseeAsync reuses (and RENAMES) an existing licensee Organization
+    // whenever a Contract with the same (LicensorRelationId, LicId) pair already exists.
+    // Creating a brand-new node guarantees no such existing Contract can collide, so the
+    // throwaway licensee Organization created here is always a new, separate row — never a
+    // rename of real data.
     if (user.role === 'Root') {
       let newLicId = null;
       let contractId = null;
       let licensePurgedOk = false; // guards the node delete below against an FK conflict
       try {
-        flow.push(await step('API: POST license-mgt (CreateLIC - throwaway Client node under Partner 109)', async () => {
+        flow.push(await step('API: POST license-mgt (CreateLIC - throwaway Client node under Partner 1584)', async () => {
           if (!clientLicTypeId) {
             throw new Error('No clientLicTypeId discovered — cannot call CreateLIC with a valid TypeId.');
           }
