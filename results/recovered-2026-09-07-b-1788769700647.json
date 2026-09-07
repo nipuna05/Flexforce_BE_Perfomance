@@ -1,0 +1,268 @@
+{
+  "runLabel": "recovered-2026-09-07-b",
+  "runTimestamp": "1788769700647",
+  "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+  "module": "Business Administration (BA) Grid",
+  "results": [
+    {
+      "role": "Partner",
+      "username": "partnerperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3525,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 927,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 794,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 1219,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/grid",
+            "totalCount": 2,
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 177,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/grid",
+            "totalCount": 2,
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: POST businessAdministration (create)",
+          "ms": 248,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration",
+            "body": "{\"message\":\"BA added successfully.\",\"status\":200,\"isSuccess\":true,\"data\":437}",
+            "createdBaId": 437
+          }
+        },
+        {
+          "label": "API: POST businessAdministration (update)",
+          "ms": 180,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration",
+            "body": "{\"message\":\"BA added successfully.\",\"status\":200,\"isSuccess\":true,\"data\":437}"
+          }
+        },
+        {
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/437"
+          }
+        }
+      ],
+      "notes": [
+        "Login endpoint observed: POST https://hrm2-apidemo2-it.h2software.nl/api/auth/login -> 200"
+      ]
+    },
+    {
+      "role": "Client",
+      "username": "clientperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3406,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 924,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 798,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 188,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/grid",
+            "totalCount": 2,
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 175,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/grid",
+            "totalCount": 2,
+            "dataLength": 2
+          }
+        },
+        {
+          "label": "API: POST businessAdministration (create)",
+          "ms": 234,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration",
+            "body": "{\"message\":\"BA added successfully.\",\"status\":200,\"isSuccess\":true,\"data\":438}",
+            "createdBaId": 438
+          }
+        },
+        {
+          "label": "API: POST businessAdministration (update)",
+          "ms": 184,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration",
+            "body": "{\"message\":\"BA added successfully.\",\"status\":200,\"isSuccess\":true,\"data\":438}"
+          }
+        },
+        {
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 197,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/438"
+          }
+        }
+      ],
+      "notes": [
+        "Login endpoint observed: POST https://hrm2-apidemo2-it.h2software.nl/api/auth/login -> 200"
+      ]
+    },
+    {
+      "role": "BA",
+      "username": "baperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3463,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 920,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 791,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST businessAdministration/grid (page 1, size 20)",
+          "ms": 172,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/grid"
+          }
+        },
+        {
+          "label": "API: POST businessAdministration/grid (page 1, size 100, search)",
+          "ms": 172,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration/grid"
+          }
+        },
+        {
+          "label": "API: POST businessAdministration (create)",
+          "ms": 173,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 400,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/businessAdministration",
+            "body": "{\"type\":\"https://tools.ietf.org/html/rfc7231#section-6.5.1\",\"title\":\"BA.Unauthorized\",\"status\":400,\"detail\":\"User is not authorized to perform this action.\",\"traceId\":\"00-2a3ef35c9801dc225684c62630357a43-d4e7ac49c5088d4c-00\"}",
+            "createdBaId": null
+          }
+        },
+        {
+          "label": "API: POST businessAdministration (update)",
+          "ms": 0,
+          "ok": false,
+          "error": "No BA id from create step — cannot exercise update.",
+          "extra": null
+        },
+        {
+          "label": "API: DELETE businessAdministration/{baId} (cleanup)",
+          "ms": 0,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "skipped": true,
+            "reason": "No BA id to clean up (create step did not return one)."
+          }
+        }
+      ],
+      "notes": [
+        "Login endpoint observed: POST https://hrm2-apidemo2-it.h2software.nl/api/auth/login -> 200",
+        "Create step did not return a usable BA id — update/delete steps below will be skipped for this role."
+      ]
+    }
+  ]
+}

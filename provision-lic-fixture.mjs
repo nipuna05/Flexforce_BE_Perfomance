@@ -23,7 +23,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const creds = JSON.parse(fs.readFileSync(path.join(__dirname, '.credentials.local.json'), 'utf-8'));
 const API_BASE_URL = creds.baseUrl.replace('uidemo', 'apidemo');
 const rootUser = creds.users.find((u) => u.role === 'Root');
-const baUser = creds.users.find((u) => u.role === 'BA');
 
 const DTS_IDS = { admin: 452, distributor: 456, partner: 460, client: 464 };
 const TIER_NAMES = ['admin', 'distributor', 'partner', 'client'];
@@ -105,6 +104,33 @@ async function loginAndGetToken(user) {
     }
     baIds.push(createdBaId);
     console.log(`  Seeded BA row: baId ${createdBaId} under client ${ids.client}`);
+  }
+
+  // Step 4: map each of the Admin/Distributor/Partner/Client test accounts to its
+  // same-named tier node. Without this, only Root (RootAdminUserName bypass) can act on
+  // the new hierarchy — every other role gets "BA.Unauthorized"/403 SD.AccessDenied on
+  // BA Grid and LIC business calls, since a brand-new node has no user associations yet.
+  // BA is deliberately left unmapped: its rejection on BA Grid create/manage calls is a
+  // role permission check, not a node-scope check, so no mapping changes that expected,
+  // by-design behavior.
+  const roleTierMap = [
+    { role: 'Admin', tier: 'admin' },
+    { role: 'Distributor', tier: 'distributor' },
+    { role: 'Partner', tier: 'partner' },
+    { role: 'Client', tier: 'client' },
+  ];
+  for (const { role, tier } of roleTierMap) {
+    const account = creds.users.find((u) => u.role === role);
+    const res = await apiCtx.post('/api/license-mgt/user', {
+      data: { licId: ids[tier], licType: licTypeIds[tier], userAccount: account.username },
+    });
+    const status = res.status();
+    const body = await res.text();
+    if (status !== 200) {
+      console.error(`WARNING: failed to map ${account.username} (${role}) to licId ${ids[tier]} — status ${status}, body: ${body}`);
+    } else {
+      console.log(`  Mapped ${account.username} (${role}) -> licId ${ids[tier]}`);
+    }
   }
 
   console.log('\n=== New fixture — update these constants by hand and commit the change ===');
