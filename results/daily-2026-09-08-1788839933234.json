@@ -1,0 +1,421 @@
+{
+  "runLabel": "daily-2026-09-08",
+  "runTimestamp": "1788839933234",
+  "baseUrl": "https://hrm2-uidemo2-it.h2software.nl",
+  "module": "LIC (License Management hierarchy + licenses + users)",
+  "results": [
+    {
+      "role": "Root",
+      "username": "m.wanninayaka@h2compute.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3759,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 960,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 793,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST license-mgt/grid (Admin_List, top-level, parentLicId=null)",
+          "ms": 701,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/grid",
+            "totalCount": 55,
+            "dataLength": 50
+          }
+        },
+        {
+          "label": "API: POST license-mgt/grid (Distributor_List under Admin 1582)",
+          "ms": 226,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/grid",
+            "totalCount": 1,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: POST license-mgt/grid (Client_List under Partner 1584)",
+          "ms": 215,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/grid",
+            "totalCount": 1,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET license-mgt/lic-type?startedDtsId=452 (Admin)",
+          "ms": 202,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/lic-type?startedDtsId=452",
+            "body": "{\"licTypeId\":13}"
+          }
+        },
+        {
+          "label": "API: GET license-mgt/lic-type?startedDtsId=464 (Client)",
+          "ms": 193,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/lic-type?startedDtsId=464",
+            "body": "{\"licTypeId\":16}"
+          }
+        },
+        {
+          "label": "API: POST license-mgt/licenses/grid (Client 1585, authenticated)",
+          "ms": 237,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/licenses/grid",
+            "totalCount": 0,
+            "dataLength": 0
+          }
+        },
+        {
+          "label": "API: POST /api/auth/register (throwaway account for LicUser mapping)",
+          "ms": 384,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/register",
+            "body": "272",
+            "throwawayEmail": "perf-lic-user-root-1788839940779@test.com",
+            "registeredUserId": 272
+          }
+        },
+        {
+          "label": "API: POST license-mgt/user (SetLicUser - map throwaway user to Admin node 1582)",
+          "ms": 248,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/user",
+            "body": "{\"status\":\"success\",\"message\":\"User successfully mapped to SD node.\",\"licType\":13,\"licId\":1582,\"licUserId\":272}",
+            "mappedUserId": 272
+          }
+        },
+        {
+          "label": "API: POST license-mgt/users/grid (GetLicUsersGrid for Admin node 1582)",
+          "ms": 211,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/users/grid",
+            "totalCount": 2,
+            "dataLength": 2,
+            "containsMappedUser": true
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/{licId}/users/{userId} (soft delete cleanup)",
+          "ms": 216,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/1582/users/272",
+            "body": "{\"message\":\"LIC user deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":{\"status\":\"success\",\"licId\":1582,\"userId\":272}}",
+            "softDeleteOk": true
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/{licId}/users/{userId}?isPermanent=true (permanent cleanup)",
+          "ms": 203,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/1582/users/272?isPermanent=true",
+            "body": "{\"message\":\"LIC user deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":{\"status\":\"success\",\"licId\":1582,\"userId\":272}}",
+            "permanentDeleteOk": true
+          }
+        },
+        {
+          "label": "API: DELETE /api/auth/delete-user/{userId} (cleanup throwaway account)",
+          "ms": 254,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/delete-user/272",
+            "body": "{\"message\":\"User deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "deleteConfirmed": true
+          }
+        },
+        {
+          "label": "API: POST license-mgt (CreateLIC - throwaway Client node under Partner 1584)",
+          "ms": 297,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt",
+            "body": "{\"message\":\"SD node created successfully\",\"status\":200,\"isSuccess\":true,\"data\":{\"status\":\"success\",\"licId\":1587,\"typeId\":16,\"parentId\":1584}}",
+            "newLicId": 1587
+          }
+        },
+        {
+          "label": "API: GET license-mgt/license?contractId=0&licId={newLicId} (GetLicLicensor)",
+          "ms": 190,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/license?contractId=0&licId=1587",
+            "body": "{\"licensorRelationId\":null,\"licensorName\":\"\",\"licenseeSdId\":1587,\"contractId\":0,\"licenseeRelationId\":null,\"licenseeName\":\"\"}",
+            "licensorRelationId": null
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/license/{contractId} (soft delete cleanup)",
+          "ms": 0,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "skipped": true,
+            "reason": "No contractId to clean up (create step did not return one, or was itself skipped)."
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/license/{contractId}?isPermanent=true (permanent cleanup)",
+          "ms": 0,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "skipped": true,
+            "reason": "No contractId to purge."
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/{licId} (DeleteLICLevel - cleanup throwaway node)",
+          "ms": 230,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/1587",
+            "body": "{\"message\":\"SD item deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":{\"status\":\"success\",\"licId\":1587,\"deletedChildCount\":0}}",
+            "nodeDeleteOk": true
+          }
+        }
+      ],
+      "notes": [
+        "GetLicenseGrid (POST license-mgt/licenses/grid) is the only LIC endpoint with .RequireAuthorization() at the route level; all other LIC endpoints exercised here are currently anonymous at the route (still called authenticated throughout, per the task brief).",
+        "Confirmed: LicUser mapping (LicId=1582, UserId=272) fully deleted (soft delete then permanent purge both returned isSuccess=true).",
+        "GetLicLicensor did not resolve a usable licensorRelationId for the new node — CreateLicenseContract below is skipped for this role.",
+        "Confirmed: throwaway LIC node 1587 (Client, under Partner 1584) deleted successfully (isSuccess=true, deletedChildCount=0)."
+      ]
+    },
+    {
+      "role": "Admin",
+      "username": "adminperform@gmail.com",
+      "flow": [
+        {
+          "label": "Page Load - Sign In page",
+          "ms": 3662,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "Login (API response)",
+          "ms": 922,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "method": "POST",
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/login",
+            "status": 200
+          }
+        },
+        {
+          "label": "Post-login redirect/home render",
+          "ms": 796,
+          "ok": true,
+          "error": null
+        },
+        {
+          "label": "API: POST license-mgt/grid (Admin_List, top-level, parentLicId=null)",
+          "ms": 206,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/grid",
+            "totalCount": 1,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: POST license-mgt/grid (Distributor_List under Admin 1582)",
+          "ms": 211,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/grid",
+            "totalCount": 1,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: POST license-mgt/grid (Client_List under Partner 1584)",
+          "ms": 210,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/grid",
+            "totalCount": 1,
+            "dataLength": 1
+          }
+        },
+        {
+          "label": "API: GET license-mgt/lic-type?startedDtsId=452 (Admin)",
+          "ms": 189,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/lic-type?startedDtsId=452",
+            "body": "{\"licTypeId\":13}"
+          }
+        },
+        {
+          "label": "API: GET license-mgt/lic-type?startedDtsId=464 (Client)",
+          "ms": 188,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/lic-type?startedDtsId=464",
+            "body": "{\"licTypeId\":16}"
+          }
+        },
+        {
+          "label": "API: POST license-mgt/licenses/grid (Client 1585, authenticated)",
+          "ms": 192,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/licenses/grid",
+            "totalCount": 0,
+            "dataLength": 0
+          }
+        },
+        {
+          "label": "API: POST /api/auth/register (throwaway account for LicUser mapping)",
+          "ms": 329,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/register",
+            "body": "273",
+            "throwawayEmail": "perf-lic-user-admin-1788839952663@test.com",
+            "registeredUserId": 273
+          }
+        },
+        {
+          "label": "API: POST license-mgt/user (SetLicUser - map throwaway user to Admin node 1582)",
+          "ms": 200,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/user",
+            "body": "{\"status\":\"success\",\"message\":\"User successfully mapped to SD node.\",\"licType\":13,\"licId\":1582,\"licUserId\":273}",
+            "mappedUserId": 273
+          }
+        },
+        {
+          "label": "API: POST license-mgt/users/grid (GetLicUsersGrid for Admin node 1582)",
+          "ms": 191,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/users/grid",
+            "totalCount": 2,
+            "dataLength": 2,
+            "containsMappedUser": true
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/{licId}/users/{userId} (soft delete cleanup)",
+          "ms": 201,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/1582/users/273",
+            "body": "{\"message\":\"LIC user deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":{\"status\":\"success\",\"licId\":1582,\"userId\":273}}",
+            "softDeleteOk": true
+          }
+        },
+        {
+          "label": "API: DELETE license-mgt/{licId}/users/{userId}?isPermanent=true (permanent cleanup)",
+          "ms": 205,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/license-mgt/1582/users/273?isPermanent=true",
+            "body": "{\"message\":\"LIC user deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":{\"status\":\"success\",\"licId\":1582,\"userId\":273}}",
+            "permanentDeleteOk": true
+          }
+        },
+        {
+          "label": "API: DELETE /api/auth/delete-user/{userId} (cleanup throwaway account)",
+          "ms": 198,
+          "ok": true,
+          "error": null,
+          "extra": {
+            "status": 200,
+            "url": "https://hrm2-apidemo2-it.h2software.nl/api/auth/delete-user/273",
+            "body": "{\"message\":\"User deleted successfully\",\"status\":200,\"isSuccess\":true,\"data\":true}",
+            "deleteConfirmed": true
+          }
+        }
+      ],
+      "notes": [
+        "GetLicenseGrid (POST license-mgt/licenses/grid) is the only LIC endpoint with .RequireAuthorization() at the route level; all other LIC endpoints exercised here are currently anonymous at the route (still called authenticated throughout, per the task brief).",
+        "Confirmed: LicUser mapping (LicId=1582, UserId=273) fully deleted (soft delete then permanent purge both returned isSuccess=true).",
+        "CreateLIC/DeleteLICLevel + CreateLicense/DeleteLicense combined cycle is only exercised under the Root role (see script comments) — Root has an unconditional RootAdminUserName bypass in LicService.cs for both node creation/deletion and license creation, making it the safest, most deterministic role for this mutating test."
+      ]
+    }
+  ]
+}
